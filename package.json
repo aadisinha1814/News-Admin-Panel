@@ -1,0 +1,20 @@
+{
+  "name": "cyber-news-pipeline",
+  "version": "1.0.0",
+  "description": "Cyber News Pipeline — Aggregator & Admin Panel",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "rss-parser": "^3.13.0",
+    "cheerio": "^1.0.0",
+    "uuid": "^9.0.1",
+    "cors": "^2.8.5",
+    "node-cron": "^3.0.3",
+    "bcryptjs": "^2.4.3"
+  }
+}
