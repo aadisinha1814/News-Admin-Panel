@@ -1,0 +1,125 @@
+[
+  {
+    "name": "Bleeping Computer",
+    "feedUrl": "https://www.bleepingcomputer.com/feed/",
+    "type": "rss",
+    "icon": "🖥️",
+    "color": "#e74c3c",
+    "stats": {
+      "total": 0,
+      "new": 0
+    }
+  },
+  {
+    "name": "GBHackers",
+    "feedUrl": "https://gbhackers.com/feed/",
+    "type": "rss",
+    "icon": "🛡️",
+    "color": "#2ecc71",
+    "stats": {
+      "total": 2,
+      "new": 0
+    }
+  },
+  {
+    "name": "Kaspersky Labs",
+    "feedUrl": "https://kaspersky.com/blog/feed/",
+    "type": "rss",
+    "icon": "🔬",
+    "color": "#00a88e",
+    "stats": {
+      "total": 0,
+      "new": 0
+    }
+  },
+  {
+    "name": "Cisco Talos",
+    "feedUrl": "https://blog.talosintelligence.com/feed.xml",
+    "type": "rss",
+    "icon": "🔵",
+    "color": "#049fd9",
+    "stats": {
+      "total": 0,
+      "new": 15
+    }
+  },
+  {
+    "name": "FBI Cyber Division",
+    "feedUrl": "https://www.fbi.gov/feeds/fbi-in-the-news/rss.xml",
+    "siteUrl": "https://www.ic3.gov/Home/IndustryAlerts",
+    "type": "rss-with-fallback",
+    "icon": "🏛️",
+    "color": "#003366",
+    "stats": {
+      "total": 0,
+      "new": 0
+    }
+  },
+  {
+    "name": "SentinelLabs",
+    "feedUrl": "https://www.sentinelone.com/labs/feed/",
+    "type": "rss",
+    "icon": "🟣",
+    "color": "#6c5ce7",
+    "stats": {
+      "total": 0,
+      "new": 0
+    }
+  },
+  {
+    "name": "Security Affairs",
+    "feedUrl": "https://securityaffairs.com/feed",
+    "type": "rss",
+    "icon": "🔐",
+    "color": "#e67e22",
+    "stats": {
+      "total": 0,
+      "new": 0
+    }
+  },
+  {
+    "name": "The420.in",
+    "feedUrl": "https://the420.in/feed/",
+    "type": "rss",
+    "icon": "🇮🇳",
+    "color": "#ff6b35",
+    "stats": {
+      "total": 0,
+      "new": 0
+    }
+  },
+  {
+    "name": "Cyber Security News",
+    "feedUrl": "https://cybersecuritynews.com/feed/",
+    "type": "rss",
+    "icon": "📰",
+    "color": "#0984e3",
+    "stats": {
+      "total": 0,
+      "new": 0
+    }
+  },
+  {
+    "name": "The Hacker News",
+    "feedUrl": "https://feeds.feedburner.com/TheHackersNews",
+    "type": "rss",
+    "icon": "💀",
+    "color": "#2d3436",
+    "stats": {
+      "total": 0,
+      "new": 0
+    }
+  },
+  {
+    "name": "Forbes Cyber",
+    "feedUrl": null,
+    "siteUrl": "https://www.forbes.com/cybersecurity/",
+    "type": "scrape",
+    "icon": "📊",
+    "color": "#b71c1c",
+    "stats": {
+      "total": 0,
+      "new": 0
+    }
+  }
+]

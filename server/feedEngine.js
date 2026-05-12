@@ -1,6 +1,7 @@
 const RSSParser = require('rss-parser');
 const cheerio = require('cheerio');
 const { v4: uuidv4 } = require('uuid');
+const store = require('./store');
 
 const parser = new RSSParser({
   timeout: 15000,
@@ -11,88 +12,7 @@ const parser = new RSSParser({
 });
 
 // ─── Source Configuration ──────────────────────────────────────────
-
-const SOURCES = [
-  {
-    name: 'Bleeping Computer',
-    feedUrl: 'https://www.bleepingcomputer.com/feed/',
-    type: 'rss',
-    icon: '🖥️',
-    color: '#e74c3c'
-  },
-  {
-    name: 'GBHackers',
-    feedUrl: 'https://gbhackers.com/feed/',
-    type: 'rss',
-    icon: '🛡️',
-    color: '#2ecc71'
-  },
-  {
-    name: 'Kaspersky Labs',
-    feedUrl: 'https://kaspersky.com/blog/feed/',
-    type: 'rss',
-    icon: '🔬',
-    color: '#00a88e'
-  },
-  {
-    name: 'Cisco Talos',
-    feedUrl: 'https://blog.talosintelligence.com/feeds/posts/default',
-    type: 'rss',
-    icon: '🔵',
-    color: '#049fd9'
-  },
-  {
-    name: 'FBI Cyber Division',
-    feedUrl: 'https://www.fbi.gov/feeds/fbi-in-the-news/rss.xml',
-    siteUrl: 'https://www.ic3.gov/Home/IndustryAlerts',
-    type: 'rss-with-fallback',
-    icon: '🏛️',
-    color: '#003366'
-  },
-  {
-    name: 'SentinelLabs',
-    feedUrl: 'https://www.sentinelone.com/labs/feed/',
-    type: 'rss',
-    icon: '🟣',
-    color: '#6c5ce7'
-  },
-  {
-    name: 'Security Affairs',
-    feedUrl: 'https://securityaffairs.com/feed',
-    type: 'rss',
-    icon: '🔐',
-    color: '#e67e22'
-  },
-  {
-    name: 'The420.in',
-    feedUrl: 'https://the420.in/feed/',
-    type: 'rss',
-    icon: '🇮🇳',
-    color: '#ff6b35'
-  },
-  {
-    name: 'Cyber Security News',
-    feedUrl: 'https://cybersecuritynews.com/feed/',
-    type: 'rss',
-    icon: '📰',
-    color: '#0984e3'
-  },
-  {
-    name: 'The Hacker News',
-    feedUrl: 'https://feeds.feedburner.com/TheHackersNews',
-    type: 'rss',
-    icon: '💀',
-    color: '#2d3436'
-  },
-  {
-    name: 'Forbes Cyber',
-    feedUrl: null,
-    siteUrl: 'https://www.forbes.com/cybersecurity/',
-    type: 'scrape',
-    icon: '📊',
-    color: '#b71c1c'
-  }
-];
+// Sources are now dynamically managed by store.js
 
 // ─── RSS Feed Parser ───────────────────────────────────────────────
 
@@ -229,8 +149,9 @@ async function fetchAllSources() {
   console.log(`[FETCH] Starting fetch cycle at ${new Date().toLocaleString()}`);
   console.log(`${'═'.repeat(60)}`);
 
+  const sourcesList = store.readSources();
   const results = await Promise.allSettled(
-    SOURCES.map(source => {
+    sourcesList.map(source => {
       switch (source.type) {
         case 'rss':
           return fetchRSSFeed(source);
@@ -255,7 +176,7 @@ async function fetchAllSources() {
   const allArticles = [];
 
   results.forEach((result, index) => {
-    const sourceInfo = SOURCES[index];
+    const sourceInfo = sourcesList[index];
     if (result.status === 'fulfilled' && result.value) {
       const r = result.value;
       summary.sources.push({
@@ -284,7 +205,7 @@ async function fetchAllSources() {
     }
   });
 
-  console.log(`\n[FETCH] Complete: ${summary.successCount}/${SOURCES.length} sources, ${summary.totalArticles} articles`);
+  console.log(`\n[FETCH] Complete: ${summary.successCount}/${sourcesList.length} sources, ${summary.totalArticles} articles`);
   console.log(`${'═'.repeat(60)}\n`);
 
   return { articles: allArticles, summary };
@@ -329,18 +250,23 @@ async function fetchWithTimeout(url, timeout = 15000) {
 }
 
 function getSources() {
-  return SOURCES.map(s => ({
-    name: s.name,
-    icon: s.icon,
-    color: s.color,
-    type: s.type,
-    feedUrl: s.feedUrl,
-    siteUrl: s.siteUrl || null
-  }));
+  return store.readSources().map(s => {
+    const articles = store.readArticles();
+    const total = articles.filter(a => a.source === s.name).length;
+    return {
+      name: s.name,
+      icon: s.icon,
+      color: s.color,
+      type: s.type,
+      feedUrl: s.feedUrl,
+      siteUrl: s.siteUrl || null,
+      total: total,
+      new: s.stats?.new || 0
+    };
+  });
 }
 
 module.exports = {
   fetchAllSources,
-  getSources,
-  SOURCES
+  getSources
 };

@@ -53,13 +53,33 @@ app.get('/api/auth/check', auth.checkAuth);
 
 // ─── Protected Static Files ───────────────────────────────────────
 
-app.get('/', auth.requireAuth, (req, res) => {
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-app.use(auth.requireAuth, express.static(path.join(__dirname, '..', 'public')));
+app.get('/admin', auth.requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'admin.html'));
+});
 
-// ─── API Routes (all protected) ───────────────────────────────────
+app.get('/admin.html', auth.requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'public', 'admin.html'));
+});
+
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// ─── API Routes ──────────────────────────────────────────────────
+
+// Get approved articles (public)
+app.get('/api/public/articles', (req, res) => {
+  try {
+    const articles = store.getArticles({ status: 'approved' });
+    // sort by latest
+    articles.sort((a,b) => new Date(b.published) - new Date(a.published));
+    res.json({ success: true, articles });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Get articles with optional filters
 app.get('/api/articles', auth.requireAuth, (req, res) => {
@@ -145,6 +165,7 @@ app.post('/api/fetch', auth.requireAuth, async (req, res) => {
   try {
     isFetching = true;
     const { articles, summary } = await feedEngine.fetchAllSources();
+    store.resetNewCounts();
     const result = store.addArticles(articles);
     lastFetchSummary = { ...summary, ...result };
     res.json({ success: true, summary: lastFetchSummary });
@@ -174,6 +195,7 @@ cron.schedule('*/30 * * * *', async () => {
   isFetching = true;
   try {
     const { articles, summary } = await feedEngine.fetchAllSources();
+    store.resetNewCounts();
     const result = store.addArticles(articles);
     lastFetchSummary = { ...summary, ...result };
     console.log(`[CRON] Added ${result.added} new articles (total: ${result.total})`);
