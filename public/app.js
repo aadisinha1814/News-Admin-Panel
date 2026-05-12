@@ -9,7 +9,7 @@
   let articles = [];
   let selectedIds = new Set();
   let currentSource = null;
-  let currentStatus = 'all';
+  let currentStatus = 'pending';
   let searchQuery = '';
   let sources = [];
 
@@ -94,10 +94,13 @@
       animateNumber($('statPending'), s.pending);
       animateNumber($('statApproved'), s.approved);
       animateNumber($('statDiscarded'), s.discarded);
-      // Update source counts
+      // Update source metrics (Total | New)
       document.querySelectorAll('.source-count').forEach(el => {
         const name = el.dataset.source;
-        el.textContent = s.bySources[name] || 0;
+        const srcData = s.sources.find(x => x.name === name);
+        if (srcData) {
+          el.textContent = `${srcData.total} | ${srcData.new}`;
+        }
       });
     } catch {}
   }
@@ -118,7 +121,7 @@
       <div class="source-item${currentSource === s.name ? ' active' : ''}" data-source="${s.name}">
         <span class="source-icon">${s.icon}</span>
         <span class="source-name">${s.name}</span>
-        <span class="source-count" data-source="${s.name}">0</span>
+        <span class="source-count" data-source="${s.name}">0 | 0</span>
       </div>
     `).join('');
 
@@ -306,12 +309,12 @@
     // Clear filters
     $('clearFilters').addEventListener('click', () => {
       currentSource = null;
-      currentStatus = 'all';
+      currentStatus = 'pending';
       searchQuery = '';
       searchInput.value = '';
       document.querySelectorAll('.source-item').forEach(e => e.classList.remove('active'));
       statusTabs.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
-      statusTabs.querySelector('[data-status="all"]').classList.add('active');
+      statusTabs.querySelector('[data-status="pending"]').classList.add('active');
       loadArticles();
     });
 
