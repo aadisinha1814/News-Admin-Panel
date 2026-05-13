@@ -35,9 +35,13 @@ app.use(session({
 
 // Login page
 app.get('/login.html', (req, res) => {
+
+  // If already logged in → go to admin dashboard
   if (req.session && req.session.user) {
-    return res.redirect('/');
+    return res.redirect('/admin');
   }
+
+  // Otherwise show login page
   res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
 });
 
@@ -74,7 +78,7 @@ app.get('/api/public/articles', (req, res) => {
   try {
     const articles = store.getArticles({ status: 'approved' });
     // sort by latest
-    articles.sort((a,b) => new Date(b.published) - new Date(a.published));
+    articles.sort((a, b) => new Date(b.published) - new Date(a.published));
     res.json({ success: true, articles });
   } catch (error) {
     res.status(500).json({ error: error.message });
