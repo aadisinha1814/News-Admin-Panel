@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,12 @@
   <title>Dashboard — Cyber News Pipeline</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="/index.css">
 </head>
+
 <body>
   <!-- Background Effects -->
   <div class="bg-grid"></div>
@@ -19,72 +23,105 @@
 
   <!-- ─── Top Navigation ──────────────────────────────────── -->
   <header class="top-bar">
+
     <div class="top-bar-left">
+
       <div class="brand">
         <div class="brand-icon">
           <svg viewBox="0 0 32 32" fill="none">
-            <circle cx="16" cy="16" r="14" stroke="url(#hGrad)" stroke-width="1.5" fill="none"/>
-            <circle cx="16" cy="16" r="4" fill="url(#hGrad)" opacity="0.8"/>
-            <circle cx="16" cy="16" r="2" fill="#0a0e27"/>
+            <circle cx="16" cy="16" r="14" stroke="url(#hGrad)" stroke-width="1.5" />
+            <circle cx="16" cy="16" r="4" fill="url(#hGrad)" opacity="0.8" />
+            <circle cx="16" cy="16" r="2" fill="#0a0e27" />
+
             <defs>
               <linearGradient id="hGrad" x1="0" y1="0" x2="32" y2="32">
-                <stop offset="0%" stop-color="#00d4ff"/>
-                <stop offset="100%" stop-color="#00ff88"/>
+                <stop offset="0%" stop-color="#00d4ff" />
+                <stop offset="100%" stop-color="#00ff88" />
               </linearGradient>
             </defs>
           </svg>
         </div>
+
         <div>
           <h1 class="brand-title">Cyber News Pipeline</h1>
           <span class="brand-sub">Admin Panel</span>
         </div>
       </div>
+
+      <nav class="nav-links">
+        <a href="/" class="nav-item">Home</a>
+        <a href="/about.html" class="nav-item">About</a>
+        <a href="/contact.html" class="nav-item">Contact</a>
+      </nav>
+
     </div>
+
     <div class="top-bar-center">
+
       <div class="search-bar" id="searchBar">
+
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
+
         <input type="text" id="searchInput" placeholder="Search articles..." autocomplete="off">
+
         <kbd class="search-kbd">/</kbd>
+
       </div>
+
     </div>
+
     <div class="top-bar-right">
+
       <div class="live-clock" id="liveClock"></div>
-      <div class="fetch-indicator" id="fetchIndicator" title="Fetch status">
+
+      <div class="fetch-indicator" id="fetchIndicator">
         <div class="fetch-dot"></div>
         <span>Idle</span>
       </div>
-      <button class="btn-icon" id="fetchBtn" title="Fetch new articles">
+
+      <button class="btn-icon" id="fetchBtn">
+
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+          <polyline points="23 4 23 10 17 10" />
+          <polyline points="1 20 1 14 7 14" />
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
         </svg>
+
       </button>
+
       <div class="user-menu" id="userMenu">
+
         <button class="user-avatar" id="userAvatarBtn">
+
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
           </svg>
+
         </button>
+
         <div class="user-dropdown" id="userDropdown">
+
           <div class="dropdown-header">
             <span class="dropdown-username" id="dropdownUsername">admin</span>
             <span class="dropdown-role">Administrator</span>
           </div>
+
           <hr class="dropdown-divider">
+
           <button class="dropdown-item" id="logoutBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-              <polyline points="16 17 21 12 16 7"/>
-              <line x1="21" y1="12" x2="9" y2="12"/>
-            </svg>
             Sign Out
           </button>
+
         </div>
+
       </div>
+
     </div>
+
   </header>
 
   <!-- ─── Stats Bar ───────────────────────────────────────── -->
@@ -92,8 +129,8 @@
     <div class="stat-card" data-type="total">
       <div class="stat-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
         </svg>
       </div>
       <div class="stat-info">
@@ -104,7 +141,8 @@
     <div class="stat-card" data-type="pending">
       <div class="stat-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
         </svg>
       </div>
       <div class="stat-info">
@@ -115,8 +153,8 @@
     <div class="stat-card" data-type="approved">
       <div class="stat-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
         </svg>
       </div>
       <div class="stat-info">
@@ -127,9 +165,9 @@
     <div class="stat-card" data-type="discarded">
       <div class="stat-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="15" y1="9" x2="9" y2="15"/>
-          <line x1="9" y1="9" x2="15" y2="15"/>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="15" y1="9" x2="9" y2="15" />
+          <line x1="9" y1="9" x2="15" y2="15" />
         </svg>
       </div>
       <div class="stat-info">
@@ -190,11 +228,16 @@
         </div>
         <div class="bulk-right">
           <button class="bulk-btn approve" id="bulkApprove" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
             Approve Selected
           </button>
           <button class="bulk-btn discard" id="bulkDiscard" disabled>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
             Discard Selected
           </button>
         </div>
@@ -217,10 +260,10 @@
       <!-- Empty State -->
       <div class="empty-state" id="emptyState" style="display:none">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/>
-          <line x1="16" y1="17" x2="8" y2="17"/>
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
         </svg>
         <h3>No articles found</h3>
         <p>Try adjusting your filters or fetch new articles</p>
@@ -230,4 +273,5 @@
 
   <script src="/app.js"></script>
 </body>
+
 </html>
