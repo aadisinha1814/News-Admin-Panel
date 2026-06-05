@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact — Cyber News Pipeline</title>
+
+    <link rel="stylesheet" href="/index.css">
+
+    <style>
+        .contact-container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+        }
+
+        .contact-card {
+            background: var(--bg-card);
+
+            border: 1px solid var(--border);
+
+            border-radius: var(--radius);
+
+            padding: 40px;
+
+            backdrop-filter: blur(10px);
+        }
+
+        .contact-title {
+            font-size: 2rem;
+            margin-bottom: 12px;
+
+            background: var(--gradient);
+
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .contact-text {
+            color: var(--text-2);
+
+            line-height: 1.8;
+
+            margin-bottom: 30px;
+        }
+
+        .contact-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .contact-item {
+            padding: 18px;
+
+            background: rgba(255, 255, 255, 0.03);
+
+            border: 1px solid var(--border);
+
+            border-radius: 10px;
+        }
+
+        .contact-item h3 {
+            color: var(--cyan);
+            margin-bottom: 8px;
+        }
+
+        .contact-item p {
+            color: var(--text-2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="bg-grid"></div>
+
+    <header class="top-bar">
+
+        <div class="top-bar-left">
+
+            <div class="brand">
+                <div>
+                    <h1 class="brand-title">Cyber News Pipeline</h1>
+                    <span class="brand-sub">Contact Page</span>
+                </div>
+            </div>
+
+            <nav class="nav-links">
+                <a href="/" class="nav-item">Home</a>
+                <a href="/about.html" class="nav-item">About</a>
+                <a href="/contact.html" class="nav-item">Contact</a>
+            </nav>
+
+        </div>
+
+        <div class="top-bar-right">
+            <a href="/admin.html" class="admin-btn">Admin Login</a>
+        </div>
+
+    </header>
+
+    <main class="contact-container">
+
+        <div class="contact-card">
+
+            <h1 class="contact-title">Get In Touch</h1>
+
+            <p class="contact-text">
+                Cyber News Pipeline is a cybersecurity intelligence aggregation platform
+                focused on delivering curated threat intelligence and security updates.
+            </p>
+
+            <div class="contact-grid">
+
+                <div class="contact-item">
+                    <h3>Email</h3>
+                    <p>support@cybernewspipeline.com</p>
+                </div>
+
+                <div class="contact-item">
+                    <h3>Phone</h3>
+                    <p>+91 9876543210</p>
+                </div>
+
+                <div class="contact-item">
+                    <h3>Location</h3>
+                    <p>Nagpur, Maharashtra, India</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</body>
+
+</html>
