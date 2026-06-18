@@ -7,25 +7,14 @@
   <title>Cyber News Pipeline — Latest Intelligence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/index.css">
-  <style>
-    .public-layout {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 30px;
-      min-height: calc(100vh - 64px);
-    }
-  </style>
 </head>
 
 <body>
   <div class="bg-grid"></div>
 
-  <!-- ─── Top Navigation ──────────────────────────────────── -->
-
+  <!-- Top Navigation Bar -->
   <header class="top-bar">
     <div class="top-bar-left">
       <div class="brand">
@@ -53,7 +42,6 @@
       <a href="/about.html" class="nav-item">About</a>
       <a href="/contact.html" class="nav-item">Contact</a>
     </nav>
-
     <div class="top-bar-right">
       <a href="/login.html" class="btn-outline">
         Admin Login
@@ -61,6 +49,7 @@
     </div>
   </header>
 
+  <!-- Main Content Area -->
   <main class="public-layout">
     <!-- Hero Section -->
     <section class="hero">
@@ -74,6 +63,7 @@
       <div class="hot-news-grid" id="hotNewsGrid"></div>
     </section>
 
+    <!-- Articles Grid -->
     <div class="articles-grid" id="publicGrid">
       <div class="loading-state" id="loadingState">
         <div class="cyber-loader">
