@@ -1,6 +1,7 @@
 (function () {
   'use strict';
 
+  // Load articles
   async function init() {
     try {
       const res = await fetch('/api/public/articles');
@@ -11,6 +12,7 @@
     }
   }
 
+  // Render Articles
   function renderPublicArticles(articles) {
     const grid = document.getElementById('publicGrid');
     if (articles.length === 0) {
@@ -26,20 +28,21 @@
       <a class="article-card" href="${a.link}" target="_blank" style="border-left: 3px solid var(--cyan)">
         <div class="card-content">
           <div class="card-meta">
-            <span class="source-badge" style="background:${badgeBg};color:${badgeColor}">
+            <span class="source-badge">
               ${a.sourceIcon || '📰'} ${a.source}
             </span>
-            <span class="card-time">${new Date(a.published).toLocaleString()}</span>
+            <span class="card-time" style="margin-left:auto;">${new Date(a.published).toLocaleString()}</span>
           </div>
           <div class="card-title">
             <span>${escapeHtml(a.title)}</span>
           </div>
-          ${a.description ? `<div class="card-desc">${escapeHtml(a.description)}</div>` : ''}
+          ${a.description ? `<div class="card-desc">${escapeHtml(a.description)}</div><span class="read-more">Read More &rarr;</span>` : ''}
         </div>
       </a>`;
     }).join('');
   }
 
+  // Secure
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str || '';
