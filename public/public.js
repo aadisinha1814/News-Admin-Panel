@@ -14,33 +14,44 @@
 
   // Render Articles
   function renderPublicArticles(articles) {
-    const grid = document.getElementById('publicGrid');
-    if (articles.length === 0) {
-      grid.innerHTML = '<div class="empty-state"><h3>No approved intelligence found.</h3></div>';
-      return;
-    }
-
-    grid.innerHTML = articles.map(a => {
-      const badgeBg = hexToRgba(a.sourceColor || '#00d4ff', 0.15);
-      const badgeColor = a.sourceColor || '#00d4ff';
-
-      return `
-      <a class="article-card" href="${a.link}" target="_blank" style="border-left: 3px solid var(--cyan)">
-        <div class="card-content">
-          <div class="card-meta">
-            <span class="source-badge">
-              ${a.sourceIcon || '📰'} ${a.source}
-            </span>
-            <span class="card-time" style="margin-left:auto;">${new Date(a.published).toLocaleString()}</span>
-          </div>
-          <div class="card-title">
-            <span>${escapeHtml(a.title)}</span>
-          </div>
-          ${a.description ? `<div class="card-desc">${escapeHtml(a.description)}</div><span class="read-more">Read More &rarr;</span>` : ''}
-        </div>
-      </a>`;
-    }).join('');
+  const grid = document.getElementById('publicGrid');
+  if (articles.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><h3>No approved intelligence found.</h3></div>';
+    return;
   }
+
+  grid.innerHTML = articles.map(a => {
+    return `
+    <div class="article-card" data-link="${a.link}" style="border-left: 3px solid var(--cyan)">
+      <div class="card-content">
+        <div class="card-meta">
+          <span class="source-badge">
+            ${a.sourceIcon || '📰'} ${a.source}
+          </span>
+          <span class="card-time">${new Date(a.published).toLocaleString()}</span>
+        </div>
+        <div class="card-title">
+          <a href="${a.link}" target="_blank" rel="noopener">${escapeHtml(a.title)}</a>
+        </div>
+        ${a.description ? `<div class="card-desc">${escapeHtml(a.description)}</div>` : ''}
+        <a href="${a.link}" target="_blank" rel="noopener" class="read-more">Read More →</a>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Add click handler to cards (but not to links inside them)
+  grid.querySelectorAll('.article-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      // Don't navigate if clicking on a link inside the card
+      if (e.target.closest('a')) return;
+      
+      const link = card.dataset.link;
+      if (link) {
+        window.open(link, '_blank', 'noopener,noreferrer');
+      }
+    });
+  });
+}
 
   // Secure
   function escapeHtml(str) {
