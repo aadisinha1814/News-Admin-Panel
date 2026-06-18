@@ -1,11 +1,7 @@
-// ═══════════════════════════════════════════════════════════
-//  Cyber News Pipeline — Frontend Application
-// ═══════════════════════════════════════════════════════════
-
 (function() {
   'use strict';
 
-  // ─── State ──────────────────────────────────────────────
+  // State
   let articles = [];
   let selectedIds = new Set();
   let currentSource = null;
@@ -13,7 +9,7 @@
   let searchQuery = '';
   let sources = [];
 
-  // ─── DOM References ─────────────────────────────────────
+  // DOM References
   const $ = id => document.getElementById(id);
   const grid = $('articlesGrid');
   const loadingState = $('loadingState');
@@ -32,7 +28,7 @@
   const userDropdown = $('userDropdown');
   const logoutBtn = $('logoutBtn');
 
-  // ─── Initialize ─────────────────────────────────────────
+  // Initialize
   async function init() {
     startClock();
     checkAuth();
@@ -44,7 +40,7 @@
     setInterval(() => { loadArticles(); loadStats(); }, 300000);
   }
 
-  // ─── Auth ───────────────────────────────────────────────
+  //Auth 
   async function checkAuth() {
     try {
       const res = await fetch('/api/auth/check');
@@ -66,7 +62,7 @@
     window.location.href = '/login.html';
   }
 
-  // ─── Data Loading ───────────────────────────────────────
+  // Data Loading 
   async function loadArticles() {
     try {
       const params = new URLSearchParams();
@@ -115,7 +111,7 @@
     } catch {}
   }
 
-  // ─── Render Sources ─────────────────────────────────────
+  // Render Sources
   function renderSources() {
     sourceList.innerHTML = sources.map(s => `
       <div class="source-item${currentSource === s.name ? ' active' : ''}" data-source="${s.name}">
@@ -136,7 +132,7 @@
     });
   }
 
-  // ─── Render Articles ────────────────────────────────────
+  // Render Articles 
   function renderArticles() {
     loadingState.style.display = 'none';
     if (articles.length === 0) {
@@ -151,69 +147,90 @@
   }
 
   function createArticleCard(a) {
-    const time = timeAgo(a.published);
-    const isSelected = selectedIds.has(a.id);
-    const statusClass = `status-${a.status}`;
-    const badgeBg = hexToRgba(a.sourceColor || '#00d4ff', 0.15);
-    const badgeColor = a.sourceColor || '#00d4ff';
+  const time = timeAgo(a.published);
+  const isSelected = selectedIds.has(a.id);
+  const statusClass = `status-${a.status}`;
 
-    return `
-    <div class="article-card ${statusClass}${isSelected ? ' selected' : ''}" data-id="${a.id}">
-      <label class="card-checkbox">
-        <input type="checkbox" ${isSelected ? 'checked' : ''} data-id="${a.id}">
-        <span class="custom-checkbox"></span>
-      </label>
-      <div class="card-content">
-        <div class="card-meta">
-          <span class="source-badge" style="background:${badgeBg};color:${badgeColor}">
-            ${a.sourceIcon || '📰'} ${a.source}
-          </span>
-          <span class="card-time">${time}</span>
-          <span class="card-status-badge ${a.status}">${a.status}</span>
-        </div>
-        <div class="card-title">
-          <a href="${a.link}" target="_blank" rel="noopener">${escapeHtml(a.title)}</a>
-        </div>
-        ${a.description ? `<div class="card-desc">${escapeHtml(a.description)}</div>` : ''}
+  return `
+  <div class="article-card ${statusClass}${isSelected ? ' selected' : ''}" data-id="${a.id}">
+    <label class="card-checkbox">
+      <input type="checkbox" ${isSelected ? 'checked' : ''} data-id="${a.id}">
+      <span class="custom-checkbox"></span>
+    </label>
+    
+    <div class="card-content">
+      <div class="card-meta">
+        <span class="source-badge">
+          ${a.sourceIcon || ''} ${a.source}
+        </span>
+        <span class="card-status-badge ${a.status}">${a.status}</span>
+        <span class="card-time">${time}</span>
       </div>
-      <div class="card-actions">
-        ${a.status !== 'approved' ? `
-          <button class="action-btn approve-btn" data-action="approve" data-id="${a.id}" title="Approve">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          </button>` : ''}
-        ${a.status !== 'discarded' ? `
-          <button class="action-btn discard-btn" data-action="discard" data-id="${a.id}" title="Discard">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          </button>` : ''}
-        ${a.status !== 'pending' ? `
-          <button class="action-btn reset-btn" data-action="reset" data-id="${a.id}" title="Reset to Pending">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.64-11.36L1 10"/></svg>
-          </button>` : ''}
+      
+      <div class="card-title">
+        <a href="${a.link}" target="_blank" rel="noopener">${escapeHtml(a.title)}</a>
       </div>
-    </div>`;
-  }
+      
+      ${a.description ? `<div class="card-desc">${escapeHtml(a.description)}</div>` : ''}
+      
+      <a href="${a.link}" target="_blank" rel="noopener" class="read-more">
+        READ MORE →
+      </a>
+    </div>
+    
+    <div class="card-actions">
+      ${a.status !== 'approved' ? `
+        <button class="action-btn approve-btn" data-action="approve" data-id="${a.id}" title="Approve">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>` : ''}
+      ${a.status !== 'discarded' ? `
+        <button class="action-btn discard-btn" data-action="discard" data-id="${a.id}" title="Discard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>` : ''}
+    </div>
+  </div>`;
+}
 
   function attachCardListeners() {
-    // Checkboxes
-    grid.querySelectorAll('.card-checkbox input').forEach(cb => {
-      cb.addEventListener('change', () => {
-        const id = cb.dataset.id;
-        if (cb.checked) selectedIds.add(id); else selectedIds.delete(id);
-        cb.closest('.article-card').classList.toggle('selected', cb.checked);
-        updateBulkUI();
-      });
+  // Card click to open article
+  grid.querySelectorAll('.article-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      // Don't navigate if clicking on interactive elements
+      if (e.target.closest('.card-checkbox') || 
+          e.target.closest('.action-btn') || 
+          e.target.closest('a')) {
+        return;
+      }
+      
+      const link = card.dataset.link;
+      if (link) {
+        window.open(link, '_blank', 'noopener,noreferrer');
+      }
     });
-    // Action buttons
-    grid.querySelectorAll('.action-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const action = btn.dataset.action;
-        const id = btn.dataset.id;
-        await performAction(action, [id]);
-      });
-    });
-  }
+  });
 
-  // ─── Actions ────────────────────────────────────────────
+  // Checkboxes
+  grid.querySelectorAll('.card-checkbox input').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const id = cb.dataset.id;
+      if (cb.checked) selectedIds.add(id); else selectedIds.delete(id);
+      cb.closest('.article-card').classList.toggle('selected', cb.checked);
+      updateBulkUI();
+    });
+  });
+
+  // Action buttons
+  grid.querySelectorAll('.action-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation(); // Prevent card click from firing
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+      await performAction(action, [id]);
+    });
+  });
+}
+
+  // Actions
   async function performAction(action, ids) {
     const endpoint = action === 'approve' ? '/api/articles/approve'
                    : action === 'discard' ? '/api/articles/discard'
@@ -265,7 +282,7 @@
     }
   }
 
-  // ─── Event Listeners ───────────────────────────────────
+  // Event Listeners 
   function setupEventListeners() {
     // Search
     let searchTimeout;
@@ -342,7 +359,7 @@
     });
   }
 
-  // ─── UI Helpers ─────────────────────────────────────────
+  // UI Helpers 
   function updateBulkUI() {
     const count = selectedIds.size;
     bulkCount.textContent = `${count} selected`;
@@ -421,6 +438,6 @@
     return `rgba(${r},${g},${b},${alpha})`;
   }
 
-  // ─── Start ──────────────────────────────────────────────
+  // Start
   init();
 })();
