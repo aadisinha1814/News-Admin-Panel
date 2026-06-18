@@ -565,13 +565,13 @@ body {
 .article-card {
   position: relative;
 }
-
+/*
 .article-card::after {
   content: '';
   position: absolute;
   inset: 0;
 }
-
+*/
 .main-layout {
   display: flex;
   gap: 0;
@@ -1318,8 +1318,6 @@ body {
   }
 }
 
-
-/*Newly added css code at 12/05/2026 at 06:32PM  by :Paresh Sonnekar*/
 
 /* =========================
    ADMIN PAGE FIXES
