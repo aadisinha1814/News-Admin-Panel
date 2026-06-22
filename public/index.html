@@ -12,11 +12,375 @@
     rel="stylesheet">
   <link rel="stylesheet" href="/index.css">
   <style>
-    .public-layout {
-      max-width: 1000px;
+    body {
+      background-color: var(--bg-deep);
+      color: var(--text-1);
+    }
+    
+    .bg-grid {
+      z-index: -1;
+    }
+
+    .public-layout-container {
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 30px;
-      min-height: calc(100vh - 64px);
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr 320px;
+      gap: 24px;
+      padding: 40px 24px;
+      align-items: start;
+    }
+
+    .feed-area {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .right-sidebar {
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      position: sticky;
+      top: 84px;
+    }
+
+    .sidebar-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-header h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      margin: 0;
+    }
+
+    .pulse-dot-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-3);
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 6px var(--cyan);
+      animation: pulse 2s infinite;
+    }
+
+    .panel-body {
+      padding: 16px;
+      height: 380px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-2);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(5, 8, 22, 0.5);
+    }
+
+    .panel-body::-webkit-scrollbar {
+      width: 2px;
+    }
+
+    .mono-feed-item::before {
+      content: "> ";
+      color: var(--cyan);
+    }
+
+    .newsletter-panel {
+      padding: 20px;
+    }
+
+    .newsletter-panel h3 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: var(--text-1);
+    }
+
+    .newsletter-panel p {
+      font-size: 0.8rem;
+      color: var(--text-2);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .newsletter-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .newsletter-form input {
+      padding: 10px 14px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-1);
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .newsletter-form input:focus {
+      border-color: var(--cyan);
+    }
+
+    .public-grid-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    /* Override status tab hover state and active state */
+    .status-tab {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--text-2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .status-tab:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-1);
+    }
+
+    .status-tab.active {
+      background: var(--cyan-dim);
+      border-color: rgba(0, 212, 255, 0.2);
+      color: var(--cyan);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Featured Article Card Custom CSS */
+    .featured-article-card {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      background: linear-gradient(135deg, rgba(10, 14, 39, 0.95), rgba(15, 20, 50, 0.8));
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .featured-article-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(0, 212, 255, 0.2);
+    }
+
+    .featured-image-container {
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      min-height: 240px;
+    }
+
+    .featured-badge-overlay {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: var(--red);
+      color: var(--bg-deep);
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px var(--red);
+    }
+
+    .featured-content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .featured-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .featured-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-1);
+      line-height: 1.3;
+    }
+
+    .featured-title a {
+      color: var(--text-1);
+      text-decoration: none;
+    }
+
+    .featured-title a:hover {
+      color: var(--cyan);
+    }
+
+    .featured-desc {
+      font-size: 0.85rem;
+      color: var(--text-2);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .featured-insight {
+      background: rgba(0, 212, 255, 0.05);
+      border-left: 3px solid var(--cyan);
+      padding: 10px 14px;
+      border-radius: 4px;
+      margin-top: auto;
+    }
+
+    .featured-insight-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .featured-insight-text {
+      font-size: 0.75rem;
+      color: var(--text-1);
+      line-height: 1.4;
+    }
+
+    .key-insight-section {
+      background: rgba(0, 212, 255, 0.03);
+      border-left: 2px solid var(--cyan);
+      padding: 10px 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+
+    .key-insight-header {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .key-insight-content {
+      font-size: 0.75rem;
+      color: var(--text-2);
+      line-height: 1.4;
+    }
+
+    .severity-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .severity-badge.critical {
+      background: var(--red-dim);
+      color: var(--red);
+      border: 1px solid rgba(255, 71, 87, 0.2);
+    }
+    
+    .severity-badge.high {
+      background: var(--yellow-dim);
+      color: var(--yellow);
+      border: 1px solid rgba(255, 165, 2, 0.2);
+    }
+    
+    .severity-badge.medium {
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+    
+    .severity-badge.low {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-2);
+      border: 1px solid var(--border);
+    }
+
+    /* Responsive styling for layout grid */
+    @media (max-width: 1200px) {
+      .public-layout-container {
+        grid-template-columns: var(--sidebar-w) 1fr;
+      }
+      .right-sidebar {
+        grid-column: span 2;
+        width: 100%;
+        flex-direction: row;
+      }
+      .sidebar-panel {
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .public-layout-container {
+        grid-template-columns: 1fr;
+        padding: 24px 16px;
+      }
+      .right-sidebar {
+        grid-column: span 1;
+        flex-direction: column;
+      }
+      .featured-article-card {
+        grid-template-columns: 1fr;
+      }
+      .featured-image-container {
+        min-height: 180px;
+      }
     }
   </style>
 </head>
@@ -25,7 +389,6 @@
   <div class="bg-grid"></div>
 
   <!-- ─── Top Navigation ──────────────────────────────────── -->
-
   <header class="top-bar">
     <div class="top-bar-left">
       <div class="brand">
@@ -54,6 +417,16 @@
       <a href="/contact.html" class="nav-item">Contact</a>
     </nav>
 
+    <div class="top-bar-center" style="max-width: 400px; width: 100%;">
+      <div class="search-bar" id="searchBar">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text" id="publicSearchInput" placeholder="Search articles..." autocomplete="off">
+      </div>
+    </div>
+
     <div class="top-bar-right">
       <a href="/login.html" class="admin-btn">
         Admin Login
@@ -61,30 +434,92 @@
     </div>
   </header>
 
-  <main class="public-layout">
-    <!-- Hero Section -->
-    <section class="hero">
-      <h1 class="hero-title">Welcome to the Cyber News Pipeline</h1>
-      <p class="hero-subtitle">Your daily source of curated cyber‑security intelligence.</p>
-    </section>
-
-    <!-- Hot News Section (highlights) -->
-    <section class="hot-news">
-      <h2 class="section-heading">Hot News</h2>
-      <div class="hot-news-grid" id="hotNewsGrid"></div>
-    </section>
-
-    <div class="articles-grid" id="publicGrid">
-      <div class="loading-state" id="loadingState">
-        <div class="cyber-loader">
-          <div class="loader-ring"></div>
-          <div class="loader-ring"></div>
-          <div class="loader-ring"></div>
-        </div>
-        <p>Loading intelligence feed...</p>
+  <!-- ─── Main Content Layout ────────────────────────────────── -->
+  <div class="main-layout public-layout-container">
+    <!-- Left Sidebar: Severity Filters -->
+    <aside class="sidebar" id="severityFilters">
+      <div class="sidebar-header">
+        <h2>Command Center</h2>
       </div>
-    </div>
-  </main>
+      <p style="font-size: 0.65rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px;">Threat Classification</p>
+      
+      <div class="status-tabs">
+        <button class="status-tab active" data-severity="all" style="width: 100%; justify-content: flex-start;">
+          <span class="status-dot" style="background: var(--cyan);"></span>All Signals
+        </button>
+        <button class="status-tab" data-severity="critical" style="width: 100%; justify-content: flex-start;">
+          <span class="status-dot" style="background: var(--red);"></span>Critical Priority
+        </button>
+        <button class="status-tab" data-severity="high" style="width: 100%; justify-content: flex-start;">
+          <span class="status-dot" style="background: var(--yellow);"></span>High Severity
+        </button>
+        <button class="status-tab" data-severity="medium-low" style="width: 100%; justify-content: flex-start;">
+          <span class="status-dot" style="background: var(--green);"></span>Routine Warnings
+        </button>
+      </div>
+      
+      <div class="sidebar-section" style="margin-top: 30px;">
+        <a href="/admin" class="admin-btn" style="display: block; text-align: center; margin-bottom: 12px; text-decoration: none;">
+          Curate Dashboard
+        </a>
+      </div>
+    </aside>
+
+    <!-- Center Section: Feed Area -->
+    <main class="feed-area">
+      <div class="feed-header-public" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px;">
+        <h2 class="section-heading" style="margin: 0; border: none; padding: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 8px;">
+          <span style="width: 4px; height: 24px; background: var(--cyan); display: inline-block;"></span>
+          Intelligence Feed
+        </h2>
+        <span id="activeSignalsBadge" class="card-status-badge approved" style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">
+          Approved Signals: 0
+        </span>
+      </div>
+
+      <!-- Dynamic Featured / Hot News Card Slot -->
+      <div id="featuredArticleContainer"></div>
+
+      <!-- Grid of Secondary Articles -->
+      <div class="public-grid-layout" id="publicGrid">
+        <div class="loading-state" id="loadingState">
+          <div class="cyber-loader">
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+          </div>
+          <p>Synchronizing security logs...</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Sidebar: Live activity & newsletter -->
+    <aside class="right-sidebar">
+      <div class="sidebar-panel">
+        <div class="panel-header">
+          <h3>Live Activity Log</h3>
+          <span class="pulse-dot-container">
+            <span class="pulse-dot"></span>
+            LIVE SYNC
+          </span>
+        </div>
+        <div class="panel-body" id="live-feed">
+          <div class="mono-feed-item">Initializing satellite link...</div>
+          <div class="mono-feed-item" style="color: var(--cyan)">[INFO] CyberNewsPipeline server online.</div>
+          <div class="mono-feed-item" style="color: var(--yellow)">[WARN] Fetching security feeds...</div>
+        </div>
+      </div>
+
+      <div class="sidebar-panel newsletter-panel">
+        <h3>Daily Briefing</h3>
+        <p>Get raw threat vectors and insights delivered to your SOC team.</p>
+        <div class="newsletter-form">
+          <input type="email" placeholder="soc@enterprise.com" id="newsletterEmail">
+          <button class="admin-btn" id="newsletterSubmitBtn" style="width: 100%; border: none; cursor: pointer;" onclick="alert('Subscribed encrypted briefings successfully!')">SUBSCRIBE</button>
+        </div>
+      </div>
+    </aside>
+  </div>
 
   <script src="/public.js"></script>
 </body>

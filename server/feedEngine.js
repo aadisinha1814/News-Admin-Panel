@@ -19,18 +19,25 @@ const parser = new RSSParser({
 async function fetchRSSFeed(source) {
   try {
     const feed = await parser.parseURL(source.feedUrl);
-    const articles = feed.items.map(item => ({
-      id: uuidv4(),
-      source: source.name,
-      sourceIcon: source.icon,
-      sourceColor: source.color,
-      title: cleanText(item.title || 'Untitled'),
-      link: item.link || '',
-      published: item.pubDate || item.isoDate || new Date().toISOString(),
-      description: cleanText(truncate(item.contentSnippet || item.content || '', 300)),
-      status: 'pending',
-      fetchedAt: new Date().toISOString()
-    }));
+    const articles = feed.items.map(item => {
+      const title = cleanText(item.title || 'Untitled');
+      const description = cleanText(truncate(item.contentSnippet || item.content || '', 300));
+      const generated = store.generateKeyInsightAndSeverity(title, description);
+      return {
+        id: uuidv4(),
+        source: source.name,
+        sourceIcon: source.icon,
+        sourceColor: source.color,
+        title,
+        link: item.link || '',
+        published: item.pubDate || item.isoDate || new Date().toISOString(),
+        description,
+        status: 'pending',
+        severity: generated.severity,
+        keyInsight: generated.keyInsight,
+        fetchedAt: new Date().toISOString()
+      };
+    });
     return { success: true, source: source.name, articles, count: articles.length };
   } catch (error) {
     console.error(`[FEED ERROR] ${source.name}: ${error.message}`);
@@ -62,16 +69,20 @@ async function fetchRSSWithFallback(source) {
       const link = $el.attr('href');
       if (title && link && title.length > 20 && title.length < 300) {
         const fullLink = link.startsWith('http') ? link : `https://www.ic3.gov${link}`;
+        const cleanTitle = cleanText(title);
+        const generated = store.generateKeyInsightAndSeverity(cleanTitle, '');
         articles.push({
           id: uuidv4(),
           source: source.name,
           sourceIcon: source.icon,
           sourceColor: source.color,
-          title: cleanText(title),
+          title: cleanTitle,
           link: fullLink,
           published: new Date().toISOString(),
           description: '',
           status: 'pending',
+          severity: generated.severity,
+          keyInsight: generated.keyInsight,
           fetchedAt: new Date().toISOString()
         });
       }
@@ -112,16 +123,20 @@ async function scrapeForbesCyber(source) {
         if (!link.startsWith('http')) {
           link = `https://www.forbes.com${link}`;
         }
+        const cleanTitle = cleanText(title);
+        const generated = store.generateKeyInsightAndSeverity(cleanTitle, '');
         articles.push({
           id: uuidv4(),
           source: source.name,
           sourceIcon: source.icon,
           sourceColor: source.color,
-          title: cleanText(title),
+          title: cleanTitle,
           link: link,
           published: new Date().toISOString(),
           description: '',
           status: 'pending',
+          severity: generated.severity,
+          keyInsight: generated.keyInsight,
           fetchedAt: new Date().toISOString()
         });
       }

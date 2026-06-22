@@ -15,6 +15,32 @@ function ensureDataDir() {
 
 // ─── Articles Store ────────────────────────────────────────────────
 
+function generateKeyInsightAndSeverity(title, description) {
+  const text = (title + " " + (description || "")).toLowerCase();
+  
+  let severity = 'medium';
+  let insight = '';
+
+  if (text.includes('zero-day') || text.includes('unpatched') || text.includes('critical vulnerability') || text.includes('active exploitation') || text.includes('rce') || text.includes('remote code execution') || text.includes('root privilege') || text.includes('zero day') || text.includes('exploit')) {
+    severity = 'critical';
+    insight = 'Critical zero-day/unpatched exploit detected in active campaigns. Action: Apply vendor updates immediately, restrict network-facing access, and monitor logs for exploit signatures.';
+  } else if (text.includes('ransomware') || text.includes('ransom') || text.includes('supply-chain') || text.includes('supply chain') || text.includes('cyber espionage') || text.includes('apt') || text.includes('state-sponsored') || text.includes('espionage') || text.includes('malware') || text.includes('backdoor')) {
+    severity = 'high';
+    insight = 'High-impact campaign targeting critical systems/supply chains. Action: Verify backups are isolated and offline, execute threat hunting protocols, and audit trust relationships with third parties.';
+  } else if (text.includes('vulnerability') || text.includes('flaw') || text.includes('bypass') || text.includes('cve-') || text.includes('compromised') || text.includes('leak') || text.includes('breach')) {
+    severity = 'high';
+    insight = 'Significant security vulnerability or data exposure identified. Risk: High potential for lateral movement or service disruption. Action: Review affected assets, schedule security patching, and monitor threat intelligence feeds.';
+  } else if (text.includes('phishing') || text.includes('scam') || text.includes('credential') || text.includes('fraud') || text.includes('stealer')) {
+    severity = 'medium';
+    insight = 'Active phishing or social engineering threat targeting corporate users. Action: Refresh employee security training, run phishing simulations, and update endpoint protection rules.';
+  } else {
+    severity = 'low';
+    insight = 'Routine security update or general industry warning. Risk: Low immediate threat. Action: Monitor organizational exposure to this trend and ensure system updates are performed regularly.';
+  }
+
+  return { severity, keyInsight: insight };
+}
+
 function readArticles() {
   ensureDataDir();
   if (!fs.existsSync(ARTICLES_FILE)) {
@@ -23,10 +49,38 @@ function readArticles() {
   }
   try {
     const data = fs.readFileSync(ARTICLES_FILE, 'utf-8');
-    return JSON.parse(data);
+    const parsed = JSON.parse(data);
+    let updated = false;
+    parsed.forEach(a => {
+      if (!a.severity || !a.keyInsight) {
+        const generated = generateKeyInsightAndSeverity(a.title, a.description);
+        if (!a.severity) a.severity = generated.severity;
+        if (!a.keyInsight) a.keyInsight = generated.keyInsight;
+        updated = true;
+      }
+    });
+    if (updated) {
+      fs.writeFileSync(ARTICLES_FILE, JSON.stringify(parsed, null, 2));
+    }
+    return parsed;
   } catch {
     return [];
   }
+}
+
+function updateArticle(id, updates) {
+  const articles = readArticles();
+  const article = articles.find(a => a.id === id);
+  if (article) {
+    if (updates.title !== undefined) article.title = updates.title;
+    if (updates.description !== undefined) article.description = updates.description;
+    if (updates.severity !== undefined) article.severity = updates.severity;
+    if (updates.keyInsight !== undefined) article.keyInsight = updates.keyInsight;
+    article.updatedAt = new Date().toISOString();
+    writeArticles(articles);
+    return true;
+  }
+  return false;
 }
 
 function writeArticles(articles) {
@@ -210,6 +264,7 @@ module.exports = {
   writeArticles,
   addArticles,
   updateStatus,
+  updateArticle,
   getArticles,
   getStats,
   clearAll,
@@ -217,5 +272,6 @@ module.exports = {
   addSource,
   resetNewCounts,
   readUsers,
-  findUser
+  findUser,
+  generateKeyInsightAndSeverity
 };

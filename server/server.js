@@ -158,6 +158,20 @@ app.post('/api/articles/reset', auth.requireAuth, (req, res) => {
   }
 });
 
+// Update article details
+app.post('/api/articles/update', auth.requireAuth, (req, res) => {
+  try {
+    const { id, updates } = req.body;
+    if (!id || !updates) {
+      return res.status(400).json({ error: 'id and updates are required' });
+    }
+    const success = store.updateArticle(id, updates);
+    res.json({ success });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Manual fetch trigger
 let isFetching = false;
 let lastFetchSummary = null;

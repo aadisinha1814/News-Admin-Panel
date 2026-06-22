@@ -12,10 +12,153 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="/index.css">
+  <style>
+    .public-layout {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 30px;
+      min-height: calc(100vh - 64px);
+    }
+    .toast-container {
+      position: fixed;
+      top: 80px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: .82rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .4);
+      animation: toastIn .3s ease;
+      backdrop-filter: blur(12px);
+      max-width: 360px;
+    }
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px)
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+    
+    /* Edit Modal styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal-overlay.hidden {
+      display: none;
+    }
+    .modal-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 500px;
+      width: 100%;
+      padding: 24px;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.15rem;
+      color: var(--cyan);
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-2);
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .close-btn:hover {
+      color: var(--text-1);
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .form-group input, .form-group textarea, .form-group select {
+      padding: 10px 14px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-1);
+      font-size: 0.85rem;
+      outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      border-color: var(--cyan);
+    }
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .modal-footer .btn-cancel {
+      padding: 10px 18px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .modal-footer .btn-cancel:hover {
+      border-color: var(--text-2);
+      color: var(--text-1);
+    }
+    
+    /* Adjustments for custom actions */
+    .action-btn.edit-btn {
+      color: var(--cyan);
+    }
+    .action-btn.edit-btn:hover {
+      background: var(--cyan-dim);
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+    }
+  </style>
 </head>
 
 <body>
-  <!-- Background Effects -->
   <div class="bg-grid"></div>
 
   <!-- Toast Container -->
@@ -23,16 +166,13 @@
 
   <!-- ─── Top Navigation ──────────────────────────────────── -->
   <header class="top-bar">
-
     <div class="top-bar-left">
-
       <div class="brand">
         <div class="brand-icon">
           <svg viewBox="0 0 32 32" fill="none">
-            <circle cx="16" cy="16" r="14" stroke="url(#hGrad)" stroke-width="1.5" />
+            <circle cx="16" cy="16" r="14" stroke="url(#hGrad)" stroke-width="1.5" fill="none" />
             <circle cx="16" cy="16" r="4" fill="url(#hGrad)" opacity="0.8" />
             <circle cx="16" cy="16" r="2" fill="#0a0e27" />
-
             <defs>
               <linearGradient id="hGrad" x1="0" y1="0" x2="32" y2="32">
                 <stop offset="0%" stop-color="#00d4ff" />
@@ -41,87 +181,66 @@
             </defs>
           </svg>
         </div>
-
         <div>
           <h1 class="brand-title">Cyber News Pipeline</h1>
           <span class="brand-sub">Admin Panel</span>
         </div>
       </div>
-
-      <nav class="nav-links">
-        <a href="/" class="nav-item">Home</a>
-        <a href="/about.html" class="nav-item">About</a>
-        <a href="/contact.html" class="nav-item">Contact</a>
-      </nav>
-
     </div>
+    <nav class="nav-links">
+      <a href="/" class="nav-item">Home</a>
+      <a href="/admin" class="nav-item">Dashboard</a>
+      <a href="/about.html" class="nav-item">About</a>
+      <a href="/contact.html" class="nav-item">Contact</a>
+    </nav>
 
     <div class="top-bar-center">
-
       <div class="search-bar" id="searchBar">
-
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="11" cy="11" r="8" />
           <line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
-
         <input type="text" id="searchInput" placeholder="Search articles..." autocomplete="off">
-
         <kbd class="search-kbd">/</kbd>
-
       </div>
-
     </div>
 
     <div class="top-bar-right">
-
       <div class="live-clock" id="liveClock"></div>
-
+      
       <div class="fetch-indicator" id="fetchIndicator">
         <div class="fetch-dot"></div>
         <span>Idle</span>
       </div>
 
       <button class="btn-icon" id="fetchBtn">
-
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="23 4 23 10 17 10" />
           <polyline points="1 20 1 14 7 14" />
           <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
         </svg>
-
       </button>
 
       <div class="user-menu" id="userMenu">
-
         <button class="user-avatar" id="userAvatarBtn">
-
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
             <circle cx="12" cy="7" r="4" />
           </svg>
-
         </button>
 
         <div class="user-dropdown" id="userDropdown">
-
           <div class="dropdown-header">
             <span class="dropdown-username" id="dropdownUsername">admin</span>
             <span class="dropdown-role">Administrator</span>
           </div>
-
           <hr class="dropdown-divider">
-
           <button class="dropdown-item" id="logoutBtn">
             Sign Out
           </button>
-
         </div>
-
       </div>
-
     </div>
-
   </header>
 
   <!-- ─── Stats Bar ───────────────────────────────────────── -->
@@ -243,19 +362,19 @@
         </div>
       </div>
 
-      <!-- Articles Container -->
-      <div class="articles-grid" id="articlesGrid">
-        <!-- Loading State -->
-        <div class="loading-state" id="loadingState">
-          <div class="cyber-loader">
-            <div class="loader-ring"></div>
-            <div class="loader-ring"></div>
-            <div class="loader-ring"></div>
-          </div>
-          <p>Initializing feed engine...</p>
-          <p class="loading-sub">Scanning cybersecurity sources</p>
+      <!-- Loading State (outside grid so DOM ref stays valid) -->
+      <div class="loading-state" id="loadingState">
+        <div class="cyber-loader">
+          <div class="loader-ring"></div>
+          <div class="loader-ring"></div>
+          <div class="loader-ring"></div>
         </div>
+        <p>Initializing feed engine...</p>
+        <p class="loading-sub">Scanning cybersecurity sources</p>
       </div>
+
+      <!-- Articles Container -->
+      <div class="articles-grid" id="articlesGrid"></div>
 
       <!-- Empty State -->
       <div class="empty-state" id="emptyState" style="display:none">
@@ -269,6 +388,51 @@
         <p>Try adjusting your filters or fetch new articles</p>
       </div>
     </main>
+  </div>
+
+  <!-- ─── Edit Curation Modal ──────────────────────────────────── -->
+  <div id="editModal" class="modal-overlay hidden">
+    <div id="editModalBackdrop" style="position:absolute;inset:0;" onclick="document.getElementById('editModal').classList.add('hidden')"></div>
+    <div class="modal-content" style="position:relative;z-index:1;">
+      <div class="modal-header">
+        <h3>Curate Intelligence</h3>
+        <button id="closeModalBtn" class="close-btn">×</button>
+      </div>
+      
+      <form id="editForm" style="display: flex; flex-direction: column; gap: 14px;">
+        <input type="hidden" id="editArticleId" />
+        
+        <div class="form-group">
+          <label for="editTitle">Headline</label>
+          <input type="text" id="editTitle" required />
+        </div>
+        
+        <div class="form-group">
+          <label for="editDesc">Description / Summary</label>
+          <textarea id="editDesc" rows="3"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label for="editSeverity">Threat Severity</label>
+          <select id="editSeverity">
+            <option value="critical">🚨 Critical</option>
+            <option value="high">⚡ High</option>
+            <option value="medium">⚠️ Medium</option>
+            <option value="low">ℹ️ Low</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="editInsight">Actionable Key Insight</label>
+          <textarea id="editInsight" rows="4" placeholder="Provide recommended enterprise actions and security implications..."></textarea>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" id="cancelModalBtn" class="btn-cancel">Cancel</button>
+          <button type="submit" class="admin-btn" style="border: none; cursor: pointer;">Save Curation</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script src="/app.js"></script>

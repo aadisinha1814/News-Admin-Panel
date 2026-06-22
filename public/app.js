@@ -153,12 +153,17 @@
   function createArticleCard(a) {
     const time = timeAgo(a.published);
     const isSelected = selectedIds.has(a.id);
-    const statusClass = `status-${a.status}`;
+    
+    let borderStyle = 'border-left: 3px solid var(--yellow)';
+    if (a.status === 'approved') borderStyle = 'border-left: 3px solid var(--green)';
+    if (a.status === 'discarded') borderStyle = 'border-left: 3px solid var(--red); opacity: 0.55;';
+
     const badgeBg = hexToRgba(a.sourceColor || '#00d4ff', 0.15);
     const badgeColor = a.sourceColor || '#00d4ff';
+    const isSelectedClass = isSelected ? ' selected' : '';
 
     return `
-    <div class="article-card ${statusClass}${isSelected ? ' selected' : ''}" data-id="${a.id}">
+    <div class="article-card${isSelectedClass}" style="${borderStyle}" data-id="${a.id}">
       <label class="card-checkbox">
         <input type="checkbox" ${isSelected ? 'checked' : ''} data-id="${a.id}">
         <span class="custom-checkbox"></span>
@@ -170,13 +175,30 @@
           </span>
           <span class="card-time">${time}</span>
           <span class="card-status-badge ${a.status}">${a.status}</span>
+          <span class="card-status-badge ${a.severity === 'critical' ? 'discarded' : a.severity === 'high' ? 'pending' : 'approved'}" style="text-transform: uppercase;">
+            ${a.severity}
+          </span>
         </div>
         <div class="card-title">
-          <a href="${a.link}" target="_blank" rel="noopener">${escapeHtml(a.title)}</a>
+          <a href="${a.link}" target="_blank">${escapeHtml(a.title)}</a>
         </div>
         ${a.description ? `<div class="card-desc">${escapeHtml(a.description)}</div>` : ''}
+        
+        <!-- Key Insight Takeaway -->
+        <div style="background: rgba(0, 212, 255, 0.03); border-left: 2px solid var(--cyan); padding: 10px 12px; border-radius: 4px; margin-top: 10px; font-size: 0.8rem;">
+          <div style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--cyan); font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+            <span>Key Takeaway</span>
+          </div>
+          <div style="color: var(--text-2); line-height: 1.4;">${escapeHtml(a.keyInsight || 'Awaiting curation updates.')}</div>
+        </div>
       </div>
+      
       <div class="card-actions">
+        <button class="action-btn edit-btn" data-action="edit" data-id="${a.id}" title="Edit Curation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </button>
         ${a.status !== 'approved' ? `
           <button class="action-btn approve-btn" data-action="approve" data-id="${a.id}" title="Approve">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
@@ -198,8 +220,14 @@
     grid.querySelectorAll('.card-checkbox input').forEach(cb => {
       cb.addEventListener('change', () => {
         const id = cb.dataset.id;
-        if (cb.checked) selectedIds.add(id); else selectedIds.delete(id);
-        cb.closest('.article-card').classList.toggle('selected', cb.checked);
+        const card = cb.closest('.article-card');
+        if (cb.checked) {
+          selectedIds.add(id);
+          card.classList.add('selected');
+        } else {
+          selectedIds.delete(id);
+          card.classList.remove('selected');
+        }
         updateBulkUI();
       });
     });
@@ -208,9 +236,24 @@
       btn.addEventListener('click', async () => {
         const action = btn.dataset.action;
         const id = btn.dataset.id;
-        await performAction(action, [id]);
+        if (action === 'edit') {
+          openEditModal(id);
+        } else {
+          await performAction(action, [id]);
+        }
       });
     });
+  }
+
+  function openEditModal(id) {
+    const article = articles.find(a => a.id === id);
+    if (!article) return;
+    $('editArticleId').value = article.id;
+    $('editTitle').value = article.title || '';
+    $('editDesc').value = article.description || '';
+    $('editSeverity').value = article.severity || 'medium';
+    $('editInsight').value = article.keyInsight || '';
+    $('editModal').classList.remove('hidden');
   }
 
   // ─── Actions ────────────────────────────────────────────
@@ -283,8 +326,14 @@
       cards.forEach(cb => {
         cb.checked = selectAll.checked;
         const id = cb.dataset.id;
-        if (selectAll.checked) selectedIds.add(id); else selectedIds.delete(id);
-        cb.closest('.article-card').classList.toggle('selected', selectAll.checked);
+        const card = cb.closest('.article-card');
+        if (selectAll.checked) {
+          selectedIds.add(id);
+          card.classList.add('selected');
+        } else {
+          selectedIds.delete(id);
+          card.classList.remove('selected');
+        }
       });
       updateBulkUI();
     });
@@ -314,7 +363,8 @@
       searchInput.value = '';
       document.querySelectorAll('.source-item').forEach(e => e.classList.remove('active'));
       statusTabs.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
-      statusTabs.querySelector('[data-status="pending"]').classList.add('active');
+      const pendingTab = statusTabs.querySelector('[data-status="pending"]');
+      if (pendingTab) pendingTab.classList.add('active');
       loadArticles();
     });
 
@@ -325,6 +375,43 @@
     });
     document.addEventListener('click', () => userDropdown.classList.remove('open'));
     logoutBtn.addEventListener('click', logout);
+
+    // Modal handlers
+    const hideModal = () => $('editModal').classList.add('hidden');
+    $('closeModalBtn').addEventListener('click', hideModal);
+    $('cancelModalBtn').addEventListener('click', hideModal);
+    $('editModalBackdrop').addEventListener('click', hideModal);
+
+    $('editForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = $('editArticleId').value;
+      const updates = {
+        title: $('editTitle').value.trim(),
+        description: $('editDesc').value.trim(),
+        severity: $('editSeverity').value,
+        keyInsight: $('editInsight').value.trim()
+      };
+      
+      try {
+        const res = await fetch('/api/articles/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, updates })
+        });
+        if (res.status === 401) return window.location.href = '/login.html';
+        const data = await res.json();
+        if (data.success) {
+          showToast('Intelligence curated successfully', 'success');
+          hideModal();
+          await loadArticles();
+          await loadStats();
+        } else {
+          showToast('Failed to save changes', 'error');
+        }
+      } catch (err) {
+        showToast('Error saving changes: ' + err.message, 'error');
+      }
+    });
 
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
@@ -338,8 +425,13 @@
         grid.querySelectorAll('.card-checkbox input').forEach(c => c.checked = false);
         updateBulkUI();
         searchInput.blur();
+        hideModal();
       }
     });
+    
+    // Set initial status tab active class
+    const pendingTab = statusTabs.querySelector('[data-status="pending"]');
+    if (pendingTab) pendingTab.classList.add('active');
   }
 
   // ─── UI Helpers ─────────────────────────────────────────
@@ -383,6 +475,7 @@
     }, 4000);
   }
 
+  // Live Clock
   function startClock() {
     const clockEl = $('liveClock');
     function update() {
@@ -421,6 +514,6 @@
     return `rgba(${r},${g},${b},${alpha})`;
   }
 
-  // ─── Start ──────────────────────────────────────────────
+  // Start init
   init();
 })();
