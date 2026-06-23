@@ -570,6 +570,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
+  pointer-events: none;
 }
 
 .main-layout {

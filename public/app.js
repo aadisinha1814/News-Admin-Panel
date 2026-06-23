@@ -10,6 +10,7 @@
   let selectedIds = new Set();
   let currentSource = null;
   let currentStatus = 'pending';
+  let currentCategory = '';
   let searchQuery = '';
   let sources = [];
 
@@ -72,6 +73,7 @@
       const params = new URLSearchParams();
       if (currentSource) params.set('source', currentSource);
       if (currentStatus && currentStatus !== 'all') params.set('status', currentStatus);
+      if (currentCategory) params.set('category', currentCategory);
       if (searchQuery) params.set('search', searchQuery);
       const res = await fetch(`/api/articles?${params}`);
       if (res.status === 401) return window.location.href = '/login.html';
@@ -182,7 +184,19 @@
         <div class="card-title">
           <a href="${a.link}" target="_blank">${escapeHtml(a.title)}</a>
         </div>
-        ${a.description ? `<div class="card-desc">${escapeHtml(a.description)}</div>` : ''}
+        
+        ${a.categories && a.categories.length > 0 ? `
+        <div style="font-size: 0.7rem; color: var(--text-2); margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          ${escapeHtml(a.categories.join(' → '))}
+        </div>` : ''}
+        
+        ${a.tags && a.tags.length > 0 ? `
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+          ${a.tags.map(t => `<span style="background: var(--cyan-dim); color: var(--cyan); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">${escapeHtml(t)}</span>`).join('')}
+        </div>` : ''}
+
+        ${a.description ? `<div class="card-desc" style="margin-top: 8px;">${escapeHtml(a.description)}</div>` : ''}
         
         <!-- Key Insight Takeaway -->
         <div style="background: rgba(0, 212, 255, 0.03); border-left: 2px solid var(--cyan); padding: 10px 12px; border-radius: 4px; margin-top: 10px; font-size: 0.8rem;">
@@ -253,6 +267,8 @@
     $('editDesc').value = article.description || '';
     $('editSeverity').value = article.severity || 'medium';
     $('editInsight').value = article.keyInsight || '';
+    $('editCategories').value = article.categories ? article.categories.join(', ') : '';
+    $('editTags').value = article.tags ? article.tags.join(', ') : '';
     $('editModal').classList.remove('hidden');
   }
 
@@ -355,10 +371,18 @@
       });
     });
 
+    // Category Filter
+    $('categoryFilter').addEventListener('change', (e) => {
+      currentCategory = e.target.value;
+      loadArticles();
+    });
+
     // Clear filters
     $('clearFilters').addEventListener('click', () => {
       currentSource = null;
       currentStatus = 'pending';
+      currentCategory = '';
+      $('categoryFilter').value = '';
       searchQuery = '';
       searchInput.value = '';
       document.querySelectorAll('.source-item').forEach(e => e.classList.remove('active'));
@@ -389,7 +413,9 @@
         title: $('editTitle').value.trim(),
         description: $('editDesc').value.trim(),
         severity: $('editSeverity').value,
-        keyInsight: $('editInsight').value.trim()
+        keyInsight: $('editInsight').value.trim(),
+        categories: $('editCategories').value.split(',').map(s => s.trim()).filter(Boolean),
+        tags: $('editTags').value.split(',').map(s => s.trim()).filter(Boolean)
       };
       
       try {

@@ -126,6 +126,18 @@
           <h2 class="featured-title">
             <a href="${a.link}" target="_blank" onclick="event.stopPropagation()">${escapeHtml(a.title)}</a>
           </h2>
+
+          ${a.categories && a.categories.length > 0 ? `
+          <div style="font-size: 0.75rem; color: var(--text-2); margin-top: 6px; display: flex; align-items: center; gap: 4px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            ${escapeHtml(a.categories.join(' → '))}
+          </div>` : ''}
+          
+          ${a.tags && a.tags.length > 0 ? `
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px;">
+            ${a.tags.map(t => `<span style="background: var(--cyan-dim); color: var(--cyan); padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">${escapeHtml(t)}</span>`).join('')}
+          </div>` : ''}
+
           <p class="featured-desc">
             ${escapeHtml(a.description || 'No summary text available. Click report link to analyze raw source code.')}
           </p>
@@ -157,6 +169,18 @@
           <div class="card-title" style="margin-top: 8px;">
             <span style="text-decoration: none; color: var(--text-1); font-size: 1.05rem;">${escapeHtml(a.title)}</span>
           </div>
+
+          ${a.categories && a.categories.length > 0 ? `
+          <div style="font-size: 0.7rem; color: var(--text-2); margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            ${escapeHtml(a.categories.join(' → '))}
+          </div>` : ''}
+          
+          ${a.tags && a.tags.length > 0 ? `
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+            ${a.tags.map(t => `<span style="background: var(--cyan-dim); color: var(--cyan); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">${escapeHtml(t)}</span>`).join('')}
+          </div>` : ''}
+
           ${a.description ? `<div class="card-desc" style="margin-top: 8px;">${escapeHtml(a.description)}</div>` : ''}
           
           ${a.keyInsight ? `

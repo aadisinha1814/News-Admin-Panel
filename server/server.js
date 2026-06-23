@@ -88,8 +88,8 @@ app.get('/api/public/articles', (req, res) => {
 // Get articles with optional filters
 app.get('/api/articles', auth.requireAuth, (req, res) => {
   try {
-    const { source, status, search } = req.query;
-    const articles = store.getArticles({ source, status, search });
+    const { source, status, search, category } = req.query;
+    const articles = store.getArticles({ source, status, search, category });
     res.json({ success: true, articles, count: articles.length });
   } catch (error) {
     res.status(500).json({ error: error.message });

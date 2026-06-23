@@ -1,0 +1,55 @@
+# Tagging System Implementation
+
+We need to add a complete tagging system for the scraped articles, allowing automatic tag generation, manual editing, and filtering on the dashboard.
+
+## User Review Required
+
+- **Automatic Tags**: I will implement a keyword-based auto-tagger. It will look for keywords like "ransomware", "phishing", "cve", "zero-day", and "malware" to automatically apply tags.
+- **Tag Editing**: In the "Curate Intelligence" modal, admins will be able to add or remove tags as a comma-separated list.
+- **Tag Filtering**: A new "Tags" section will be added to the sidebar allowing you to filter articles by common tags.
+
+Please review the proposed approach and let me know if you want any specific tags to be auto-generated or if you prefer a different tag editing UI.
+
+## Proposed Changes
+
+### Backend Store & API
+
+#### [MODIFY] `server/store.js`
+- Update `generateKeyInsightAndSeverity` (or rename it) to also return a `tags` array based on keyword matching in the title and description.
+- Ensure the `readArticles` migration adds `tags: []` (or auto-generates them) for any existing articles without tags.
+- Update `updateArticle` to accept and save `tags` updates.
+- Update `getArticles` to support a `filters.tag` property.
+
+#### [MODIFY] `server/feedEngine.js`
+- Update the scraping logic to extract and save the generated tags alongside `severity` and `keyInsight`.
+
+#### [MODIFY] `server/server.js`
+- Update the `/api/articles` route to accept `tag` as a query parameter and pass it to `store.getArticles`.
+
+---
+
+### Frontend Dashboard
+
+#### [MODIFY] `public/admin.html`
+- **Sidebar**: Add a "Tags Filter" section below the Status Filter.
+- **Edit Modal**: Add an input field for "Tags (comma-separated)" to allow admins to edit the tags manually.
+
+#### [MODIFY] `public/app.js`
+- **State**: Add `currentTag` state to track the active tag filter.
+- **Article Cards**: Update `createArticleCard` to render the tags as small badges within the article card.
+- **Filtering**: Update `loadArticles` to send the `tag` query parameter. Add click listeners for the sidebar tag filters.
+- **Editing**: Populate the tags input when opening the edit modal, and include the parsed `tags` array in the update payload when saving.
+
+#### [MODIFY] `public/index.css`
+- Add styles for the tag badges (`.card-tag`) on the article cards and the tag filters in the sidebar.
+
+## Verification Plan
+
+### Automated Tests
+- No automated tests currently exist, but we will verify the data store successfully applies tags to existing and new articles without breaking the JSON schema.
+
+### Manual Verification
+1. Open the dashboard and verify existing articles now have auto-generated tags displayed on their cards.
+2. Click a tag filter in the sidebar and ensure the feed updates to show only articles with that tag.
+3. Click "Edit Curation" on an article, modify the tags, save, and verify the card updates with the new tags.
+4. Click "Fetch" and ensure newly scraped articles are automatically tagged correctly.

@@ -309,6 +309,23 @@
       </div>
 
       <div class="sidebar-section">
+        <h3>Category Filter</h3>
+        <select id="categoryFilter" class="form-group" style="width: 100%; padding: 8px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: 6px; color: var(--text-1); outline: none; margin-bottom: 10px;">
+          <option value="">All Categories</option>
+          <option value="Cisco">Cisco</option>
+          <option value="Microsoft">Microsoft</option>
+          <option value="Networking">Networking</option>
+          <option value="OS & Software">OS & Software</option>
+          <option value="OS & Devices">OS & Devices</option>
+          <option value="Exploits & Vulnerabilities">Exploits & Vulnerabilities</option>
+          <option value="Malware & Campaigns">Malware & Campaigns</option>
+          <option value="Vulnerabilities">Vulnerabilities</option>
+          <option value="Social Engineering">Social Engineering</option>
+          <option value="Industry News">Industry News</option>
+        </select>
+      </div>
+
+      <div class="sidebar-section">
         <h3>Status Filter</h3>
         <div class="status-tabs" id="statusTabs">
           <button class="status-tab active" data-status="pending">
@@ -425,6 +442,16 @@
         <div class="form-group">
           <label for="editInsight">Actionable Key Insight</label>
           <textarea id="editInsight" rows="4" placeholder="Provide recommended enterprise actions and security implications..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="editCategories">Categories (comma separated)</label>
+          <input type="text" id="editCategories" placeholder="e.g. Cisco, Networking" />
+        </div>
+
+        <div class="form-group">
+          <label for="editTags">Priority Tags (comma separated)</label>
+          <input type="text" id="editTags" placeholder="e.g. [Cisco], [High Risk]" />
         </div>
         
         <div class="modal-footer">

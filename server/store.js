@@ -20,25 +20,54 @@ function generateKeyInsightAndSeverity(title, description) {
   
   let severity = 'medium';
   let insight = '';
+  let tags = [];
+  let categories = [];
 
+  // Categorization Logic (Hierarchical)
+  if (text.includes('cisco')) categories = ['Cisco', 'Networking'];
+  else if (text.includes('microsoft') || text.includes('windows')) categories = ['Microsoft', 'OS & Software'];
+  else if (text.includes('linux') || text.includes('ubuntu')) categories = ['Linux', 'OS & Software'];
+  else if (text.includes('apple') || text.includes('mac') || text.includes('ios')) categories = ['Apple', 'OS & Devices'];
+  else categories = ['General', 'Cybersecurity'];
+
+  // Tagging Logic (Priority Highlights)
   if (text.includes('zero-day') || text.includes('unpatched') || text.includes('critical vulnerability') || text.includes('active exploitation') || text.includes('rce') || text.includes('remote code execution') || text.includes('root privilege') || text.includes('zero day') || text.includes('exploit')) {
     severity = 'critical';
     insight = 'Critical zero-day/unpatched exploit detected in active campaigns. Action: Apply vendor updates immediately, restrict network-facing access, and monitor logs for exploit signatures.';
+    tags.push('[Zero-Day]', '[Critical Vulnerability]', '[Patch Immediately]');
+    categories.push('Exploits & Vulnerabilities');
   } else if (text.includes('ransomware') || text.includes('ransom') || text.includes('supply-chain') || text.includes('supply chain') || text.includes('cyber espionage') || text.includes('apt') || text.includes('state-sponsored') || text.includes('espionage') || text.includes('malware') || text.includes('backdoor')) {
     severity = 'high';
     insight = 'High-impact campaign targeting critical systems/supply chains. Action: Verify backups are isolated and offline, execute threat hunting protocols, and audit trust relationships with third parties.';
+    tags.push('[Ransomware/Malware]', '[High Impact]', '[Potential Financial Loss]');
+    categories.push('Malware & Campaigns');
   } else if (text.includes('vulnerability') || text.includes('flaw') || text.includes('bypass') || text.includes('cve-') || text.includes('compromised') || text.includes('leak') || text.includes('breach')) {
     severity = 'high';
     insight = 'Significant security vulnerability or data exposure identified. Risk: High potential for lateral movement or service disruption. Action: Review affected assets, schedule security patching, and monitor threat intelligence feeds.';
+    tags.push('[Vulnerability]', '[Data Exposure Risk]');
+    categories.push('Vulnerabilities');
   } else if (text.includes('phishing') || text.includes('scam') || text.includes('credential') || text.includes('fraud') || text.includes('stealer')) {
     severity = 'medium';
     insight = 'Active phishing or social engineering threat targeting corporate users. Action: Refresh employee security training, run phishing simulations, and update endpoint protection rules.';
+    tags.push('[Phishing/Scam]', '[User Targeting]');
+    categories.push('Social Engineering');
   } else {
     severity = 'low';
     insight = 'Routine security update or general industry warning. Risk: Low immediate threat. Action: Monitor organizational exposure to this trend and ensure system updates are performed regularly.';
+    tags.push('[Industry News]', '[Low Priority]');
+    categories.push('Industry News');
   }
 
-  return { severity, keyInsight: insight };
+  // Extract company names as tags if present
+  const companies = ['Cisco', 'Microsoft', 'Apple', 'Google', 'Okta', 'Fortinet', 'Palo Alto', 'VMware', 'CrowdStrike'];
+  companies.forEach(company => {
+    if (text.includes(company.toLowerCase())) tags.unshift(`[${company}]`);
+  });
+
+  // Deduplicate tags
+  tags = [...new Set(tags)];
+
+  return { severity, keyInsight: insight, tags, categories };
 }
 
 function readArticles() {
@@ -52,10 +81,12 @@ function readArticles() {
     const parsed = JSON.parse(data);
     let updated = false;
     parsed.forEach(a => {
-      if (!a.severity || !a.keyInsight) {
+      if (!a.severity || !a.keyInsight || !a.tags || !a.categories) {
         const generated = generateKeyInsightAndSeverity(a.title, a.description);
         if (!a.severity) a.severity = generated.severity;
         if (!a.keyInsight) a.keyInsight = generated.keyInsight;
+        if (!a.tags) a.tags = generated.tags;
+        if (!a.categories) a.categories = generated.categories;
         updated = true;
       }
     });
@@ -76,6 +107,8 @@ function updateArticle(id, updates) {
     if (updates.description !== undefined) article.description = updates.description;
     if (updates.severity !== undefined) article.severity = updates.severity;
     if (updates.keyInsight !== undefined) article.keyInsight = updates.keyInsight;
+    if (updates.tags !== undefined) article.tags = updates.tags;
+    if (updates.categories !== undefined) article.categories = updates.categories;
     article.updatedAt = new Date().toISOString();
     writeArticles(articles);
     return true;
@@ -134,6 +167,9 @@ function getArticles(filters = {}) {
   }
   if (filters.status) {
     articles = articles.filter(a => a.status === filters.status);
+  }
+  if (filters.category) {
+    articles = articles.filter(a => a.categories && a.categories.includes(filters.category));
   }
   if (filters.search) {
     const q = filters.search.toLowerCase();
