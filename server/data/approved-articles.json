@@ -1,0 +1,166 @@
+[
+  {
+    "id": "6d699234-f5a7-46e0-adbd-828eacd53e71",
+    "source": "GBHackers",
+    "sourceIcon": "🛡️",
+    "sourceColor": "#2ecc71",
+    "title": "Hackers Abuse DAEMON Tools Distribution Channel to Deliver Malicious Payloads",
+    "link": "https://gbhackers.com/hackers-abuse-daemon-tools-deliver-malicious-payloads/",
+    "published": "Tue, 05 May 2026 14:00:29 +0000",
+    "content": "A sophisticated supply-chain attack has compromised the official distribution channel for DAEMON Tools, delivering multi-stage malware to users worldwide. Since April 8, 2026, threat actors have distributed trojanized installers signed with legitimate digital certificates to conduct highly targeted...",
+    "tags": [
+      {
+        "id": 31,
+        "name": "Supply Chain",
+        "category": "Attack Type"
+      },
+      {
+        "id": 51,
+        "name": "Malware",
+        "category": "Attack Type"
+      }
+    ],
+    "approvedAt": "2026-06-23T13:22:01.638Z"
+  },
+  {
+    "id": "67fc8d8a-5300-4504-baad-15be7d0acc18",
+    "source": "GBHackers",
+    "sourceIcon": "🛡️",
+    "sourceColor": "#2ecc71",
+    "title": "LuxSci Launches Enterprise-Grade HIPAA-Compliant Email Security for Mid-Sized Healthcare Organizations",
+    "link": "https://gbhackers.com/luxsci-introduces-enterprise-grade-hipaa-compliant-email-security-tailored-for-mid-sized-healthcare-organizations/",
+    "published": "Tue, 05 May 2026 14:42:35 +0000",
+    "content": "Cambridge, MA, May 5th, 2026, CyberNewswire New right-sized offering brings advanced encryption, easy API integration, and HITRUST-certified compliance to the most underserved segment in healthcare email — with pricing starting at $99/month LuxSci, a leading provider of HIPAA compliant secure...",
+    "tags": [
+      {
+        "id": 38,
+        "name": "Healthcare",
+        "category": "Industry"
+      },
+      {
+        "id": 47,
+        "name": "HIPAA",
+        "category": "Compliance"
+      }
+    ],
+    "approvedAt": "2026-06-23T13:22:01.613Z"
+  },
+  {
+    "id": "ecfa8010-7e6e-4f1c-acdb-d1017443899c",
+    "source": "The420.in",
+    "sourceIcon": "🇮🇳",
+    "sourceColor": "#ff6b35",
+    "title": "New Zealand Returnee Loses Lakhs in Ludhiana Work From Home Scam",
+    "link": "https://the420.in/ludhiana-new-zealand-expat-work-from-home-scam-rs-21-lakh/",
+    "published": "Wed, 06 May 2026 04:51:54 +0000",
+    "content": "A 46 year old man who recently returned to India from New Zealand has been allegedly defrauded of Rs 21 lakh in Ludhiana after falling for a work from home scam promoted on social media and routed through WhatsApp and Telegram. Instagram Ad Led Victim Into Task Scam Deepinderpal Singh told the...",
+    "tags": [
+      {
+        "id": 54,
+        "name": "Scam",
+        "category": "Attack Type"
+      }
+    ],
+    "approvedAt": "2026-06-23T13:22:01.585Z"
+  },
+  {
+    "id": "1f302d08-9756-4463-805b-2db98645ccb8",
+    "source": "GBHackers",
+    "sourceIcon": "🛡️",
+    "sourceColor": "#2ecc71",
+    "title": "Critical Palo Alto Firewall Vulnerability Enables Attackers to Gain Root Privileges",
+    "link": "https://gbhackers.com/critical-palo-alto-firewall-vulnerability/",
+    "published": "Wed, 06 May 2026 04:58:44 +0000",
+    "content": "Palo Alto Networks has issued an urgent security advisory concerning a critical vulnerability affecting its PAN-OS software. Tracked as CVE-2026-0300, this high-severity security flaw carries a CVSS 4.0 base score of 9.3 and is currently experiencing limited active exploitation in the wild. The...",
+    "tags": [
+      {
+        "id": 25,
+        "name": "CVE",
+        "category": "Named Vulnerability"
+      }
+    ],
+    "approvedAt": "2026-06-23T13:22:01.559Z"
+  },
+  {
+    "id": "a0a791f7-a8c8-41cc-8619-af753e745dbe",
+    "source": "GBHackers",
+    "sourceIcon": "🛡️",
+    "sourceColor": "#2ecc71",
+    "title": "Ransomware Gangs Escalate Attacks on Aviation and Aerospace Sector",
+    "link": "https://gbhackers.com/attacks-on-aviation-and-aerospace/",
+    "published": "Wed, 06 May 2026 05:02:29 +0000",
+    "content": "Ransomware and data extortion groups are increasingly targeting the aviation and aerospace sector, exploiting interconnected systems, shared platforms, and identity-based access models to cause operational disruption and data compromise. Cyber risk across aviation has shifted beyond traditional IT...",
+    "tags": [
+      {
+        "id": 27,
+        "name": "Ransomware",
+        "category": "Attack Type"
+      }
+    ],
+    "approvedAt": "2026-06-23T13:22:01.533Z"
+  },
+  {
+    "id": "c49aacec-a317-4059-bd4e-bd4ecd396c36",
+    "source": "Cyber Security News",
+    "sourceIcon": "📰",
+    "sourceColor": "#0984e3",
+    "title": "Chinese APT VerdantBamboo Uses BRICKSTORM Malware to Compromise Firewalls and Appliances",
+    "link": "https://cybersecuritynews.com/chinese-apt-verdantbamboo-uses-brickstorm-malware/",
+    "published": "Fri, 05 Jun 2026 12:03:27 +0000",
+    "content": "A Chinese state-linked hacking group has been quietly living inside corporate networks for well over a year, using a custom malware toolkit to compromise firewalls, storage systems, and network appliances without ever tripping an alarm. The group, tracked as VerdantBamboo, has shown a level of...",
+    "tags": [
+      {
+        "id": 51,
+        "name": "Malware",
+        "category": "Attack Type"
+      },
+      {
+        "id": 52,
+        "name": "APT",
+        "category": "Threat Actor"
+      }
+    ],
+    "approvedAt": "2026-06-23T13:22:01.509Z"
+  },
+  {
+    "id": "b8fec13a-1748-44ae-ad93-2fbe006aed35",
+    "source": "GBHackers",
+    "sourceIcon": "🛡️",
+    "sourceColor": "#2ecc71",
+    "title": "Malicious LNK Files Disguised as Job Resumes Target Corporate Employees",
+    "link": "https://gbhackers.com/lnk-files-disguised-as-job-resumes/",
+    "published": "Thu, 18 Jun 2026 06:06:26 +0000",
+    "content": "Malicious LNK files masquerading as job resumes are being used in targeted campaigns against corporate employees, combining social engineering with multi-stage malware delivery to achieve stealthy persistence and remote access. Attackers craft filenames that include company names and job titles for...",
+    "tags": [
+      {
+        "id": 51,
+        "name": "Malware",
+        "category": "Attack Type"
+      },
+      {
+        "id": 53,
+        "name": "Social Engineering",
+        "category": "Attack Type"
+      }
+    ],
+    "approvedAt": "2026-06-23T13:22:01.471Z"
+  },
+  {
+    "id": "5e30cb5b-40c1-435a-b7df-4532e25f7154",
+    "source": "Bleeping Computer",
+    "sourceIcon": "🖥️",
+    "sourceColor": "#e74c3c",
+    "title": "5 reasons Microsoft 365 backup isn’t enough for business data protection",
+    "link": "https://www.bleepingcomputer.com/news/security/5-reasons-microsoft-365-backup-isnt-enough-for-business-data-protection/",
+    "published": "Thu, 18 Jun 2026 09:48:56 -0400",
+    "content": "Microsoft 365 helps keep services running, but protecting and recovering business data remains your responsibility. Acronis breaks down five gaps organizations should consider when evaluating Microsoft 365 data protection. [...]",
+    "tags": [
+      {
+        "id": 1,
+        "name": "Microsoft",
+        "category": "Tech Vendor"
+      }
+    ],
+    "approvedAt": "2026-06-23T13:22:01.435Z"
+  }
+]
