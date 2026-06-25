@@ -157,3 +157,40 @@ body {
   .hero-title { font-size: 1.8rem; }
   .public-layout .articles-grid, .hot-news-grid { grid-template-columns: 1fr; }
 }
+
+.card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.tag-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    
+    /* Default styling */
+    background: rgba(0, 212, 255, 0.1);
+    color: var(--cyan);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+/* Dynamic colors based on category (Optional enhancement) */
+.tag-pill[data-category="ransomware-group"] { background: rgba(255, 71, 87, 0.1); color: var(--red); border-color: rgba(255, 71, 87, 0.2); }
+.tag-pill[data-category="named-vulnerability"] { background: rgba(255, 165, 2, 0.1); color: var(--yellow); border-color: rgba(255, 165, 2, 0.2); }
+.tag-pill[data-category="ioc"] { background: rgba(136, 146, 176, 0.1); color: var(--text-2); border-color: rgba(136, 146, 176, 0.2); }
+
+.tag-pill:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.2);
+}
