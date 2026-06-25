@@ -12,6 +12,9 @@ const auth = require('./auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const tagger = require('./tagger');
+const approvedStore = require('./approvedStore');
+
 // ─── Middleware ────────────────────────────────────────────────────
 
 app.use(cors({
@@ -75,14 +78,13 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Get approved articles (public)
 app.get('/api/public/articles', (req, res) => {
-  try {
-    const articles = store.getArticles({ status: 'approved' });
-    // sort by latest
-    articles.sort((a, b) => new Date(b.published) - new Date(a.published));
-    res.json({ success: true, articles });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    try {
+        // Read directly from the new approved file
+        const articles = approvedStore.getApprovedArticles();
+        res.json({ success: true, articles });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Get articles with optional filters
@@ -118,16 +120,28 @@ app.get('/api/sources', auth.requireAuth, (req, res) => {
 
 // Approve articles
 app.post('/api/articles/approve', auth.requireAuth, (req, res) => {
-  try {
-    const { ids } = req.body;
-    if (!ids || !Array.isArray(ids)) {
-      return res.status(400).json({ error: 'ids array is required' });
+    try {
+        const { ids } = req.body;
+        if (!ids || !Array.isArray(ids)) {
+            return res.status(400).json({ error: 'ids array is required' });
+        }
+        
+        // 1. Update status in the main articles.json
+        const updated = store.updateStatus(ids, 'approved');
+
+        // 2. Trigger Tagging & Save to approved-articles.json
+        ids.forEach(id => {
+            const article = store.readArticles().find(a => a.id === id);
+            if (article) {
+                const tags = tagger.tagArticle(article); // Run the rules
+                approvedStore.addApprovedArticle(article, tags); // Save to new file
+            }
+        });
+
+        res.json({ success: true, updated });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    const updated = store.updateStatus(ids, 'approved');
-    res.json({ success: true, updated });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 });
 
 // Discard articles
