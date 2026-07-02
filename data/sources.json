@@ -17,7 +17,7 @@
     "icon": "🛡️",
     "color": "#2ecc71",
     "stats": {
-      "total": 2,
+      "total": 0,
       "new": 0
     }
   },
@@ -86,7 +86,8 @@
     "stats": {
       "total": 0,
       "new": 0
-    }
+    },
+    "filterCyber": true
   },
   {
     "name": "Cyber Security News",
@@ -112,9 +113,8 @@
   },
   {
     "name": "Forbes Cyber",
-    "feedUrl": null,
-    "siteUrl": "https://www.forbes.com/cybersecurity/",
-    "type": "scrape",
+    "feedUrl": "https://news.google.com/rss/search?q=site:forbes.com+cybersecurity&hl=en-US&gl=US&ceid=US:en",
+    "type": "rss",
     "icon": "📊",
     "color": "#b71c1c",
     "stats": {

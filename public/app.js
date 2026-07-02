@@ -1,15 +1,140 @@
+//  ═══════════════════════════════════════════════════════════
+//  Cyber News Pipeline — Frontend Application
+//  ═══════════════════════════════════════════════════════════
 (function() {
   'use strict';
-
-  // State
+  // ─── State ─────────────────────────────────────────────
   let articles = [];
   let selectedIds = new Set();
   let currentSource = null;
   let currentStatus = 'pending';
+  let currentCategory = '';
   let searchQuery = '';
   let sources = [];
-
-  // DOM References
+  // ─── Article Summary Modal ────────────────────────────────
+  const ArticleModal = (function () {
+    let overlay = null;
+    function buildHTML(a) {
+      const badgeBg  = hexToRgba(a.sourceColor || '#00d4ff', 0.18);
+      const badgeClr = a.sourceColor || '#00d4ff';
+      const sev      = a.severity || 'medium';
+      const dateStr  = timeAgo(a.published);
+      const tagsHtml = (a.tags && a.tags.length)
+        ? `<div class="article-modal-tags">${a.tags.map(t => `<span class="article-modal-tag">${escapeHtml(t)}</span>`).join('')}</div>`
+        : '';
+      const catsHtml = (a.categories && a.categories.length)
+        ? `<div class="article-modal-categories">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;flex-shrink:0"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+             ${escapeHtml(a.categories.join(' → '))}
+           </div>`
+        : '';
+      // Summary section: show shimmer skeleton, populate after fetch
+      const descHtml = `
+        <div class="article-modal-section-label">Article Summary</div>
+        <div class="article-modal-desc article-modal-loading" id="articleModalSummary"><span></span></div>`;
+      const insightHtml = a.keyInsight
+        ? `<div class="article-modal-insight">
+             <div class="article-modal-insight-label">Analyst Assessment</div>
+             <div class="article-modal-insight-text">${escapeHtml(a.keyInsight)}</div>
+           </div>`
+        : '';
+      return `
+        <div class="article-modal-overlay" id="articleModalOverlay" role="dialog" aria-modal="true">
+          <div class="article-modal">
+            <div class="article-modal-accent ${sev}"></div>
+            <div class="article-modal-header">
+              <div class="article-modal-meta">
+                <div class="article-modal-source-row">
+                  <span class="article-modal-source-badge" style="background:${badgeBg};color:${badgeClr}">
+                    ${a.sourceIcon || '📰'} ${escapeHtml(a.source)}
+                  </span>
+                  <span class="article-modal-severity ${sev}">${sev}</span>
+                  <span class="article-modal-severity ${a.status}" style="background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--text-3)">${a.status}</span>
+                  <span class="article-modal-time">${dateStr}</span>
+                </div>
+                <div class="article-modal-title">${escapeHtml(a.title)}</div>
+              </div>
+              <button class="article-modal-close" id="articleModalClose" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+            <div class="article-modal-body">
+              ${catsHtml}
+              ${tagsHtml}
+              ${descHtml}
+              ${insightHtml}
+            </div>
+            <div class="article-modal-footer">
+              <a class="article-modal-read-btn" href="${a.link}" target="_blank" rel="noopener noreferrer">
+                Read Full Article
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px">
+                  <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </a>
+              <button class="article-modal-dismiss" id="articleModalDismiss">Dismiss</button>
+            </div>
+          </div>
+        </div>`;
+    }
+    function close() {
+      if (!overlay) return;
+      overlay.classList.add('closing');
+      overlay.addEventListener('animationend', () => {
+        overlay.remove();
+        overlay = null;
+      }, { once: true });
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') close();
+    }
+    function open(article) {
+      if (overlay) { close(); }
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = buildHTML(article);
+      overlay = wrapper.firstElementChild;
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+      document.getElementById('articleModalClose').addEventListener('click', close);
+      document.getElementById('articleModalDismiss').addEventListener('click', close);
+      document.addEventListener('keydown', onKey);
+      // ─── Lazy-load article content ──────────────────────────
+      const summaryEl = document.getElementById('articleModalSummary');
+      if (summaryEl) {
+        fetch('/api/public/preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url: article.link })
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (!overlay || !overlay.isConnected) return;
+          summaryEl.classList.remove('article-modal-loading');
+          const text = data.preview || article.description;
+          if (text) {
+            summaryEl.textContent = text;
+          } else {
+            summaryEl.textContent = 'Full preview not available — click \'Read Full Article\' below.';
+            summaryEl.style.color = 'var(--text-3)';
+            summaryEl.style.fontStyle = 'italic';
+          }
+        })
+        .catch(() => {
+          if (!overlay || !overlay.isConnected) return;
+          summaryEl.classList.remove('article-modal-loading');
+          summaryEl.textContent = article.description || 'Preview unavailable — site may block automated access.';
+          if (!article.description) {
+            summaryEl.style.color = 'var(--text-3)';
+            summaryEl.style.fontStyle = 'italic';
+          }
+        });
+      }
+    }
+    return { open, close };
+  })();
+  // ─── DOM References ─────────────────────────────────────
   const $ = id => document.getElementById(id);
   const grid = $('articlesGrid');
   const loadingState = $('loadingState');
@@ -27,8 +152,7 @@
   const userAvatarBtn = $('userAvatarBtn');
   const userDropdown = $('userDropdown');
   const logoutBtn = $('logoutBtn');
-
-  // Initialize
+  // ─── Initialize ─────────────────────────────────────────
   async function init() {
     startClock();
     checkAuth();
@@ -39,8 +163,7 @@
     // Auto-refresh every 5 minutes
     setInterval(() => { loadArticles(); loadStats(); }, 300000);
   }
-
-  //Auth 
+  // ─── Auth ───────────────────────────────────────────────
   async function checkAuth() {
     try {
       const res = await fetch('/api/auth/check');
@@ -54,20 +177,19 @@
       }
     } catch { window.location.href = '/login.html'; }
   }
-
   async function logout() {
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
     } catch {}
     window.location.href = '/login.html';
   }
-
-  // Data Loading 
+  // ─── Data Loading ───────────────────────────────────────
   async function loadArticles() {
     try {
       const params = new URLSearchParams();
       if (currentSource) params.set('source', currentSource);
       if (currentStatus && currentStatus !== 'all') params.set('status', currentStatus);
+      if (currentCategory) params.set('category', currentCategory);
       if (searchQuery) params.set('search', searchQuery);
       const res = await fetch(`/api/articles?${params}`);
       if (res.status === 401) return window.location.href = '/login.html';
@@ -79,7 +201,6 @@
       showToast('Failed to load articles', 'error');
     }
   }
-
   async function loadStats() {
     try {
       const res = await fetch('/api/stats');
@@ -100,7 +221,6 @@
       });
     } catch {}
   }
-
   async function loadSources() {
     try {
       const res = await fetch('/api/sources');
@@ -110,8 +230,7 @@
       renderSources();
     } catch {}
   }
-
-  // Render Sources
+  // ─── Render Sources ─────────────────────────────────────
   function renderSources() {
     sourceList.innerHTML = sources.map(s => `
       <div class="source-item${currentSource === s.name ? ' active' : ''}" data-source="${s.name}">
@@ -120,7 +239,6 @@
         <span class="source-count" data-source="${s.name}">0 | 0</span>
       </div>
     `).join('');
-
     sourceList.querySelectorAll('.source-item').forEach(el => {
       el.addEventListener('click', () => {
         const name = el.dataset.source;
@@ -131,8 +249,7 @@
       });
     });
   }
-
-  // Render Articles 
+  // ─── Render Articles ────────────────────────────────────
   function renderArticles() {
     loadingState.style.display = 'none';
     if (articles.length === 0) {
@@ -145,92 +262,125 @@
     attachCardListeners();
     updateBulkUI();
   }
-
   function createArticleCard(a) {
-  const time = timeAgo(a.published);
-  const isSelected = selectedIds.has(a.id);
-  const statusClass = `status-${a.status}`;
-
-  return `
-  <div class="article-card ${statusClass}${isSelected ? ' selected' : ''}" data-id="${a.id}">
-    <label class="card-checkbox">
-      <input type="checkbox" ${isSelected ? 'checked' : ''} data-id="${a.id}">
-      <span class="custom-checkbox"></span>
-    </label>
-    
-    <div class="card-content">
-      <div class="card-meta">
-        <span class="source-badge">
-          ${a.sourceIcon || ''} ${a.source}
-        </span>
-        <span class="card-status-badge ${a.status}">${a.status}</span>
-        <span class="card-time">${time}</span>
+    const time = timeAgo(a.published);
+    const isSelected = selectedIds.has(a.id);
+    let borderStyle = 'border-left: 3px solid var(--yellow)';
+    if (a.status === 'approved') borderStyle = 'border-left: 3px solid var(--green)';
+    if (a.status === 'discarded') borderStyle = 'border-left: 3px solid var(--red); opacity: 0.55;';
+    const badgeBg = hexToRgba(a.sourceColor || '#00d4ff', 0.15);
+    const badgeColor = a.sourceColor || '#00d4ff';
+    const isSelectedClass = isSelected ? ' selected' : '';
+    return `
+    <div class="article-card${isSelectedClass}" style="${borderStyle}" data-id="${a.id}">
+      <label class="card-checkbox">
+        <input type="checkbox" ${isSelected ? 'checked' : ''} data-id="${a.id}">
+        <span class="custom-checkbox"></span>
+      </label>
+      <div class="card-content">
+        <div class="card-meta">
+          <span class="source-badge" style="background:${badgeBg};color:${badgeColor}">
+            ${a.sourceIcon || ' 📰 '} ${a.source}
+          </span>
+          <span class="card-time">${time}</span>
+          <span class="card-status-badge ${a.status}">${a.status}</span>
+          <span class="card-status-badge ${a.severity === 'critical' ? 'discarded' : a.severity === 'high' ? 'pending' : 'approved'}" style="text-transform: uppercase;">
+            ${a.severity}
+          </span>
+        </div>
+        <div class="card-title">
+          <span class="article-title-link" data-id="${a.id}" style="cursor:pointer;color:var(--cyan);text-decoration:underline;text-decoration-color:rgba(0,212,255,0.3);text-underline-offset:3px;font-size:inherit;">${escapeHtml(a.title)}</span>
+        </div>
+        ${a.categories && a.categories.length > 0 ? `
+        <div style="font-size: 0.7rem; color: var(--text-2); margin-top: 4px; display: flex; align-items: center; gap: 4px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          ${escapeHtml(a.categories.join(' → '))}
+        </div>` : ''}
+        ${a.tags && a.tags.length > 0 ? `
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px;">
+          ${a.tags.map(t => `<span style="background: var(--cyan-dim); color: var(--cyan); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">${escapeHtml(t)}</span>`).join('')}
+        </div>` : ''}
+        ${a.description ? `<div class="card-desc" style="margin-top: 8px;">${escapeHtml(a.description)}</div>` : ''}
+        <!-- Key Insight Takeaway -->
+        <div style="background: rgba(0, 212, 255, 0.03); border-left: 2px solid var(--cyan); padding: 10px 12px; border-radius: 4px; margin-top: 10px; font-size: 0.8rem;">
+          <div style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--cyan); font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+            <span>Key Takeaway</span>
+          </div>
+          <div style="color: var(--text-2); line-height: 1.4;">${escapeHtml(a.keyInsight || 'Awaiting curation updates.')}</div>
+        </div>
       </div>
-      
-      <div class="card-title">
-        <a href="${a.link}" target="_blank" rel="noopener">${escapeHtml(a.title)}</a>
+      <div class="card-actions">
+        <button class="action-btn edit-btn" data-action="edit" data-id="${a.id}" title="Edit Curation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 14px; height: 14px;">
+            <path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+        </button>
+        ${a.status !== 'approved' ? `
+          <button class="action-btn approve-btn" data-action="approve" data-id="${a.id}" title="Approve">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>` : ''}
+        ${a.status !== 'discarded' ? `
+          <button class="action-btn discard-btn" data-action="discard" data-id="${a.id}" title="Discard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>` : ''}
+        ${a.status !== 'pending' ? `
+          <button class="action-btn reset-btn" data-action="reset" data-id="${a.id}" title="Reset to Pending">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.64-11.36L1 10"/></svg>
+          </button>` : ''}
       </div>
-      
-      ${a.description ? `<div class="card-desc">${escapeHtml(a.description)}</div>` : ''}
-      
-      <a href="${a.link}" target="_blank" rel="noopener" class="read-more">
-        READ MORE →
-      </a>
-    </div>
-    
-    <div class="card-actions">
-      ${a.status !== 'approved' ? `
-        <button class="action-btn approve-btn" data-action="approve" data-id="${a.id}" title="Approve">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        </button>` : ''}
-      ${a.status !== 'discarded' ? `
-        <button class="action-btn discard-btn" data-action="discard" data-id="${a.id}" title="Discard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>` : ''}
-    </div>
-  </div>`;
-}
-
+    </div>`;
+  }
   function attachCardListeners() {
-  // Card click to open article
-  grid.querySelectorAll('.article-card').forEach(card => {
-    card.addEventListener('click', (e) => {
-      // Don't navigate if clicking on interactive elements
-      if (e.target.closest('.card-checkbox') || 
-          e.target.closest('.action-btn') || 
-          e.target.closest('a')) {
-        return;
-      }
-      
-      const link = card.dataset.link;
-      if (link) {
-        window.open(link, '_blank', 'noopener,noreferrer');
-      }
+    // Article title → open summary modal
+    grid.querySelectorAll('.article-title-link').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = el.dataset.id;
+        const art = articles.find(a => a.id === id);
+        if (art) ArticleModal.open(art);
+      });
     });
-  });
-
-  // Checkboxes
-  grid.querySelectorAll('.card-checkbox input').forEach(cb => {
-    cb.addEventListener('change', () => {
-      const id = cb.dataset.id;
-      if (cb.checked) selectedIds.add(id); else selectedIds.delete(id);
-      cb.closest('.article-card').classList.toggle('selected', cb.checked);
-      updateBulkUI();
+    // Checkboxes
+    grid.querySelectorAll('.card-checkbox input').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const id = cb.dataset.id;
+        const card = cb.closest('.article-card');
+        if (cb.checked) {
+          selectedIds.add(id);
+          card.classList.add('selected');
+        } else {
+          selectedIds.delete(id);
+          card.classList.remove('selected');
+        }
+        updateBulkUI();
+      });
     });
-  });
-
-  // Action buttons
-  grid.querySelectorAll('.action-btn').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.stopPropagation(); // Prevent card click from firing
-      const action = btn.dataset.action;
-      const id = btn.dataset.id;
-      await performAction(action, [id]);
+    // Action buttons
+    grid.querySelectorAll('.action-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        if (action === 'edit') {
+          openEditModal(id);
+        } else {
+          await performAction(action, [id]);
+        }
+      });
     });
-  });
-}
-
-  // Actions
+  }
+  function openEditModal(id) {
+    const article = articles.find(a => a.id === id);
+    if (!article) return;
+    $('editArticleId').value = article.id;
+    $('editTitle').value = article.title || '';
+    $('editDesc').value = article.description || '';
+    $('editSeverity').value = article.severity || 'medium';
+    $('editInsight').value = article.keyInsight || '';
+    $('editCategories').value = article.categories ? article.categories.join(', ') : '';
+    $('editTags').value = article.tags ? article.tags.join(', ') : '';
+    $('editModal').classList.remove('hidden');
+  }
+  // ─── Actions ────────────────────────────────────────────
   async function performAction(action, ids) {
     const endpoint = action === 'approve' ? '/api/articles/approve'
                    : action === 'discard' ? '/api/articles/discard'
@@ -254,7 +404,6 @@
       showToast('Action failed: ' + e.message, 'error');
     }
   }
-
   async function triggerFetch() {
     fetchBtn.classList.add('spinning');
     fetchIndicator.classList.add('fetching');
@@ -281,8 +430,7 @@
       fetchIndicator.querySelector('span').textContent = 'Idle';
     }
   }
-
-  // Event Listeners 
+  // ─── Event Listeners ───────────────────────────────────
   function setupEventListeners() {
     // Search
     let searchTimeout;
@@ -293,26 +441,28 @@
         loadArticles();
       }, 350);
     });
-
     // Select All
     selectAll.addEventListener('change', () => {
       const cards = grid.querySelectorAll('.card-checkbox input');
       cards.forEach(cb => {
         cb.checked = selectAll.checked;
         const id = cb.dataset.id;
-        if (selectAll.checked) selectedIds.add(id); else selectedIds.delete(id);
-        cb.closest('.article-card').classList.toggle('selected', selectAll.checked);
+        const card = cb.closest('.article-card');
+        if (selectAll.checked) {
+          selectedIds.add(id);
+          card.classList.add('selected');
+        } else {
+          selectedIds.delete(id);
+          card.classList.remove('selected');
+        }
       });
       updateBulkUI();
     });
-
     // Bulk actions
     bulkApprove.addEventListener('click', () => performAction('approve', [...selectedIds]));
     bulkDiscard.addEventListener('click', () => performAction('discard', [...selectedIds]));
-
     // Fetch button
     fetchBtn.addEventListener('click', triggerFetch);
-
     // Status tabs
     statusTabs.querySelectorAll('.status-tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -322,19 +472,25 @@
         loadArticles();
       });
     });
-
+    // Category Filter
+    $('categoryFilter').addEventListener('change', (e) => {
+      currentCategory = e.target.value;
+      loadArticles();
+    });
     // Clear filters
     $('clearFilters').addEventListener('click', () => {
       currentSource = null;
       currentStatus = 'pending';
+      currentCategory = '';
+      $('categoryFilter').value = '';
       searchQuery = '';
       searchInput.value = '';
       document.querySelectorAll('.source-item').forEach(e => e.classList.remove('active'));
       statusTabs.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
-      statusTabs.querySelector('[data-status="pending"]').classList.add('active');
+      const pendingTab = statusTabs.querySelector('[data-status="pending"]');
+      if (pendingTab) pendingTab.classList.add('active');
       loadArticles();
     });
-
     // User menu
     userAvatarBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -342,24 +498,63 @@
     });
     document.addEventListener('click', () => userDropdown.classList.remove('open'));
     logoutBtn.addEventListener('click', logout);
-
+    // Modal handlers
+    const hideModal = () => $('editModal').classList.add('hidden');
+    $('closeModalBtn').addEventListener('click', hideModal);
+    $('cancelModalBtn').addEventListener('click', hideModal);
+    $('editModalBackdrop').addEventListener('click', hideModal);
+    $('editForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = $('editArticleId').value;
+      const updates = {
+        title: $('editTitle').value.trim(),
+        description: $('editDesc').value.trim(),
+        severity: $('editSeverity').value,
+        keyInsight: $('editInsight').value.trim(),
+        categories: $('editCategories').value.split(',').map(s => s.trim()).filter(Boolean),
+        tags: $('editTags').value.split(',').map(s => s.trim()).filter(Boolean)
+      };
+      try {
+        const res = await fetch('/api/articles/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, updates })
+        });
+        if (res.status === 401) return window.location.href = '/login.html';
+        const data = await res.json();
+        if (data.success) {
+          showToast('Intelligence curated successfully', 'success');
+          hideModal();
+          await loadArticles();
+          await loadStats();
+        } else {
+          showToast('Failed to save changes', 'error');
+        }
+      } catch (err) {
+        showToast('Error saving changes: ' + err.message, 'error');
+      }
+    });
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.key === '/') { e.preventDefault(); searchInput.focus(); }
       if (e.key === 'r' || e.key === 'R') { e.preventDefault(); triggerFetch(); }
       if (e.key === 'Escape') {
+        ArticleModal.close();
         selectedIds.clear();
         selectAll.checked = false;
         grid.querySelectorAll('.article-card.selected').forEach(c => c.classList.remove('selected'));
         grid.querySelectorAll('.card-checkbox input').forEach(c => c.checked = false);
         updateBulkUI();
         searchInput.blur();
+        hideModal();
       }
     });
+    // Set initial status tab active class
+    const pendingTab = statusTabs.querySelector('[data-status="pending"]');
+    if (pendingTab) pendingTab.classList.add('active');
   }
-
-  // UI Helpers 
+  // ── UI Helpers ─────────────────────────────────────────
   function updateBulkUI() {
     const count = selectedIds.size;
     bulkCount.textContent = `${count} selected`;
@@ -367,7 +562,6 @@
     bulkDiscard.disabled = count === 0;
     selectAll.checked = count > 0 && count === grid.querySelectorAll('.card-checkbox input').length;
   }
-
   function animateNumber(el, target) {
     const current = parseInt(el.textContent) || 0;
     if (current === target) return;
@@ -381,7 +575,6 @@
       if (i >= steps) { el.textContent = target; clearInterval(timer); }
     }, 20);
   }
-
   function showToast(message, type = 'info') {
     const icons = {
       success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
@@ -399,7 +592,7 @@
       setTimeout(() => toast.remove(), 300);
     }, 4000);
   }
-
+  // Live Clock
   function startClock() {
     const clockEl = $('liveClock');
     function update() {
@@ -409,7 +602,6 @@
     update();
     setInterval(update, 1000);
   }
-
   function timeAgo(dateStr) {
     if (!dateStr) return '';
     const now = Date.now();
@@ -424,20 +616,17 @@
     if (days < 7) return `${days}d ago`;
     return new Date(dateStr).toLocaleDateString('en-US', { month:'short', day:'numeric' });
   }
-
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str || '';
     return div.innerHTML;
   }
-
   function hexToRgba(hex, alpha) {
     const r = parseInt(hex.slice(1,3), 16) || 0;
     const g = parseInt(hex.slice(3,5), 16) || 0;
     const b = parseInt(hex.slice(5,7), 16) || 0;
     return `rgba(${r},${g},${b},${alpha})`;
   }
-
-  // Start
+  // Start init
   init();
 })();

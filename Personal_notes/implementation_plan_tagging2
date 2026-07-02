@@ -1,0 +1,48 @@
+# Hierarchical Categories and Prominent Tagging
+
+This plan outlines the implementation of a chained category filtering system and a quick-insight tagging system to help users grasp the core of a news article instantly.
+
+## Goal Description
+The objective is to implement:
+1. **Chained Category Filters:** Articles will be assigned a hierarchical path of categories (e.g., `Cisco -> Networking -> Network Scanning Vulnerabilities`), and users will be able to filter articles by drilling down through this chain.
+2. **Priority Tags:** Articles will have prominent metadata tags (e.g., `[Company Name]`, `[Financial Loss]`, `[Attack Type]`) displayed directly on the article card. This ensures users can get a "70% idea" of the news at a glance.
+
+## Open Questions
+> [!WARNING]
+> Please review and clarify the following before we proceed:
+> 1. **Auto-Generation vs Manual:** Should the system attempt to automatically generate these categories and tags from the article text (using keyword matching or an LLM if one is integrated later), or will they primarily be manually curated by admins through the Edit Modal? 
+> 2. **Filter UI:** For the chain of filters, do you prefer cascading dropdowns in the sidebar (Select Level 1 -> Select Level 2 -> Select Level 3) or a folder-tree structure?
+
+## Proposed Changes
+
+### Backend Storage & Engine
+
+#### [MODIFY] [store.js](file:///c:/Users/Paresh/Desktop/DeepCytes/News-Admin-Panel/server/store.js)
+- Enhance the auto-generation logic (currently `generateKeyInsightAndSeverity`) to also extract or assign `categories` (an array of strings representing the path) and `tags` (an array of strings for highlights).
+- Update the `updateArticle` API to allow saving manual edits to `categories` and `tags`.
+- Update `getArticles` to support filtering by a category path.
+
+#### [MODIFY] [server.js](file:///c:/Users/Paresh/Desktop/DeepCytes/News-Admin-Panel/server/server.js)
+- Ensure the API endpoints for fetching and updating articles correctly handle the new `categories` and `tags` fields.
+
+---
+
+### Frontend UI
+
+#### [MODIFY] [admin.html](file:///c:/Users/Paresh/Desktop/DeepCytes/News-Admin-Panel/public/admin.html)
+- Add a new "Category Filter" section in the sidebar. This could be a set of dropdowns that populate based on the available category chains.
+- Update the Edit Modal to include input fields for managing the `categories` chain and priority `tags`.
+
+#### [MODIFY] [app.js](file:///c:/Users/Paresh/Desktop/DeepCytes/News-Admin-Panel/public/app.js)
+- **Article Cards:** Update `createArticleCard` to render the `tags` prominently as badges (e.g., `[Cisco] [Ransomware] [High Risk]`) right under the title or in the meta bar.
+- **Filtering Logic:** Add logic to handle the new category filters, updating the article grid when a specific chain (e.g., Level 1 -> Level 2) is selected.
+
+#### [MODIFY] [index.css](file:///c:/Users/Paresh/Desktop/DeepCytes/News-Admin-Panel/public/index.css) (if exists)
+- Add styling for the new prominent tag badges to ensure they stand out and draw the user's attention immediately.
+
+## Verification Plan
+### Manual Verification
+- Fetch new articles and verify that the auto-tagging system assigns plausible tags and category chains based on the text.
+- Open the admin dashboard, verify that tags are clearly visible on the cards.
+- Use the sidebar to drill down through a category filter chain and ensure the feed updates correctly.
+- Edit an article manually to change its tags/categories and verify the changes persist.

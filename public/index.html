@@ -7,14 +7,872 @@
   <title>Cyber News Pipeline — Latest Intelligence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="/public.css">
+  <style>
+    body {
+      background-color: var(--bg-deep);
+      color: var(--text-1);
+    }
+    
+    .bg-grid {
+      z-index: -1;
+    }
+
+    .public-layout-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 200px 1fr 320px; /* Reduced from 260px */
+  gap: 24px;
+  padding: 40px 24px;
+  align-items: start;
+}
+
+    .feed-area {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .right-sidebar {
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      position: sticky;
+      top: 84px;
+    }
+
+    .sidebar-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-header h3 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      margin: 0;
+    }
+
+    .pulse-dot-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--text-3);
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 6px var(--cyan);
+      animation: pulse 2s infinite;
+    }
+
+    .panel-body {
+      padding: 16px;
+      height: 380px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-2);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(5, 8, 22, 0.5);
+    }
+
+    .panel-body::-webkit-scrollbar {
+      width: 2px;
+    }
+
+    .mono-feed-item::before {
+      content: "> ";
+      color: var(--cyan);
+    }
+
+    .newsletter-panel {
+      padding: 20px;
+    }
+
+    .newsletter-panel h3 {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+      color: var(--text-1);
+    }
+
+    .newsletter-panel p {
+      font-size: 0.8rem;
+      color: var(--text-2);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .newsletter-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .newsletter-form input {
+      padding: 10px 14px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-1);
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .newsletter-form input:focus {
+      border-color: var(--cyan);
+    }
+
+    .public-grid-layout {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    /* Override status tab hover state and active state */
+    .status-tab {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--text-2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+
+    .status-tab:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-1);
+    }
+
+    .status-tab.active {
+      background: var(--cyan-dim);
+      border-color: rgba(0, 212, 255, 0.2);
+      color: var(--cyan);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Featured Article Card Custom CSS */
+    .featured-article-card {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      background: linear-gradient(135deg, rgba(10, 14, 39, 0.95), rgba(15, 20, 50, 0.8));
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.1);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .featured-article-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(0, 212, 255, 0.2);
+    }
+
+    .featured-image-container {
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      min-height: 240px;
+    }
+
+    .featured-badge-overlay {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: var(--red);
+      color: var(--bg-deep);
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      box-shadow: 0 0 10px var(--red);
+    }
+
+    .featured-content {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .featured-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .featured-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-1);
+      line-height: 1.3;
+    }
+
+    .featured-title a {
+      color: var(--text-1);
+      text-decoration: none;
+    }
+
+    .featured-title a:hover {
+      color: var(--cyan);
+    }
+
+    .featured-desc {
+      font-size: 0.85rem;
+      color: var(--text-2);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .featured-insight {
+      background: rgba(0, 212, 255, 0.05);
+      border-left: 3px solid var(--cyan);
+      padding: 10px 14px;
+      border-radius: 4px;
+      margin-top: auto;
+    }
+
+    .featured-insight-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .featured-insight-text {
+      font-size: 0.75rem;
+      color: var(--text-1);
+      line-height: 1.4;
+    }
+
+    .key-insight-section {
+      background: rgba(0, 212, 255, 0.03);
+      border-left: 2px solid var(--cyan);
+      padding: 10px 12px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+
+    .key-insight-header {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cyan);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .key-insight-content {
+      font-size: 0.75rem;
+      color: var(--text-2);
+      line-height: 1.4;
+    }
+
+    .severity-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .severity-badge.critical {
+      background: var(--red-dim);
+      color: var(--red);
+      border: 1px solid rgba(255, 71, 87, 0.2);
+    }
+    
+    .severity-badge.high {
+      background: var(--yellow-dim);
+      color: var(--yellow);
+      border: 1px solid rgba(255, 165, 2, 0.2);
+    }
+    
+    .severity-badge.medium {
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+    }
+    
+    .severity-badge.low {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-2);
+      border: 1px solid var(--border);
+    }
+
+    /* Responsive styling for layout grid */
+    @media (max-width: 1200px) {
+      .public-layout-container {
+        grid-template-columns: var(--sidebar-w) 1fr;
+      }
+      .right-sidebar {
+        grid-column: span 2;
+        width: 100%;
+        flex-direction: row;
+      }
+      .sidebar-panel {
+        flex: 1;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .public-layout-container {
+        grid-template-columns: 1fr;
+        padding: 24px 16px;
+      }
+      .right-sidebar {
+        grid-column: span 1;
+        flex-direction: column;
+      }
+      .featured-article-card {
+        grid-template-columns: 1fr;
+      }
+      .featured-image-container {
+        min-height: 180px;
+      }
+    }
+/* Cyber Weather Panel */
+.cyber-weather-panel {
+  background: linear-gradient(135deg, rgba(15, 20, 50, 0.95), rgba(10, 14, 39, 0.9));
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.weather-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.weather-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.weather-info h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  color: var(--text-1);
+}
+
+.weather-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--cyan);
+}
+
+.score-max {
+  font-size: 0.9rem;
+  color: var(--text-3);
+}
+
+.weather-description {
+  font-size: 0.85rem;
+  color: var(--text-2);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.top-threats-section h4 {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--cyan);
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+
+.top-threats-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.top-threats-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.top-threats-list li:last-child {
+  border-bottom: none;
+}
+
+.threat-link {
+  color: var(--text-1);
+  text-decoration: none;
+  flex: 1;
+  transition: color 0.2s;
+}
+
+.threat-link:hover {
+  color: var(--cyan);
+}
+
+.threat-severity-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--yellow);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.loading-item, .no-threats, .no-data {
+  color: var(--text-3);
+  font-style: italic;
+}
+
+/* Weekly Breakdown Panel */
+.weekly-breakdown-panel h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-1);
+  margin: 0 0 16px 0;
+  font-weight: 700;
+}
+
+.pie-chart-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pie-chart {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.pie-slice {
+  transition: opacity 0.2s;
+}
+
+.pie-chart-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  color: var(--text-2);
+  flex: 1;
+}
+
+.legend-percentage {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-1);
+  font-weight: 600;
+}
+
+/* Sectors Panel */
+.sectors-panel h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-1);
+  margin: 0 0 12px 0;
+  font-weight: 700;
+}
+
+.sectors-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sectors-list li {
+  padding: 6px 0;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+
+.sectors-list li::before {
+  content: '• ';
+  color: var(--cyan);
+  font-weight: bold;
+}
+/* Fix for Top Threats text wrapping */
+.top-threats-list li {
+  display: flex;
+  flex-direction: column; /* Stack the title and score vertically */
+  gap: 6px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.threat-link {
+  width: 100%;
+  white-space: normal !important; /* Force text to wrap */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-overflow: unset !important; /* Remove the ellipsis (...) */
+  display: block;
+  line-height: 1.4;
+}
+
+.threat-severity-score {
+  align-self: flex-end; /* Keep the score aligned to the right */
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.article-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 22, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    animation: modalFadeIn 0.2s ease forwards;
+  }
+  .article-modal-overlay.closing {
+    animation: modalFadeOut 0.2s ease forwards;
+  }
+  @keyframes modalFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes modalFadeOut {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+  .article-modal {
+    background: linear-gradient(145deg, rgba(10, 14, 39, 0.98), rgba(15, 20, 50, 0.98));
+    border: 1px solid rgba(0, 212, 255, 0.18);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
+    transform: translateY(24px) scale(0.97);
+    animation: modalSlideUp 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  .article-modal-overlay.closing .article-modal {
+    animation: modalSlideDown 0.2s ease forwards;
+  }
+  @keyframes modalSlideUp {
+    from { transform: translateY(24px) scale(0.97); opacity: 0; }
+    to   { transform: translateY(0) scale(1);       opacity: 1; }
+  }
+  @keyframes modalSlideDown {
+    from { transform: translateY(0) scale(1);       opacity: 1; }
+    to   { transform: translateY(24px) scale(0.97); opacity: 0; }
+  }
+  .article-modal-accent {
+    height: 3px;
+    width: 100%;
+    flex-shrink: 0;
+    background: var(--cyan);
+  }
+  .article-modal-accent.critical { background: linear-gradient(90deg, #ff4757, #ff6b81); }
+  .article-modal-accent.high     { background: linear-gradient(90deg, #ffa502, #ffcc55); }
+  .article-modal-accent.medium   { background: linear-gradient(90deg, #00d4ff, #00ff88); }
+  .article-modal-accent.low      { background: linear-gradient(90deg, #5a6484, #8892b0); }
+  .article-modal-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 20px 24px 16px;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(0,212,255,0.07);
+  }
+  .article-modal-meta { flex: 1; min-width: 0; }
+  .article-modal-source-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .article-modal-source-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .article-modal-severity {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+  .article-modal-severity.critical { background: var(--red-dim); color: var(--red); }
+  .article-modal-severity.high     { background: var(--yellow-dim); color: var(--yellow); }
+  .article-modal-severity.medium   { background: var(--cyan-dim); color: var(--cyan); }
+  .article-modal-severity.low      { background: rgba(90,100,132,0.15); color: var(--text-3); }
+  .article-modal-time {
+    font-size: 0.7rem;
+    color: var(--text-3);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .article-modal-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-1);
+    line-height: 1.45;
+  }
+  .article-modal-close {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(0,212,255,0.12);
+    color: var(--text-2);
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .article-modal-close:hover {
+    background: var(--red-dim);
+    color: var(--red);
+    border-color: rgba(255,71,87,0.3);
+  }
+  .article-modal-body {
+    padding: 20px 24px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .article-modal-body::-webkit-scrollbar { width: 4px; }
+  .article-modal-body::-webkit-scrollbar-track { background: transparent; }
+  .article-modal-body::-webkit-scrollbar-thumb { background: rgba(0,212,255,0.15); border-radius: 2px; }
+  .article-modal-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+  .article-modal-tag {
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .article-modal-categories {
+    font-size: 0.72rem;
+    color: var(--text-3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .article-modal-desc {
+    font-size: 0.92rem;
+    color: var(--text-2);
+    line-height: 1.7;
+    border-left: 2px solid rgba(0,212,255,0.2);
+    padding-left: 14px;
+  }
+  .article-modal-insight {
+    background: rgba(0, 212, 255, 0.04);
+    border: 1px solid rgba(0, 212, 255, 0.12);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .article-modal-insight-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--cyan);
+    margin-bottom: 8px;
+  }
+  .article-modal-insight-text {
+    font-size: 0.875rem;
+    color: var(--text-1);
+    line-height: 1.65;
+  }
+  .article-modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid rgba(0,212,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .article-modal-read-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,255,136,0.1));
+    border: 1px solid rgba(0,212,255,0.3);
+    color: var(--cyan);
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .article-modal-read-btn:hover {
+    background: linear-gradient(135deg, rgba(0,212,255,0.25), rgba(0,255,136,0.18));
+    border-color: rgba(0,212,255,0.55);
+    box-shadow: 0 0 20px rgba(0,212,255,0.2);
+    transform: translateY(-1px);
+  }
+  .article-modal-dismiss {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-3);
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .article-modal-dismiss:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-2);
+  }
+  .article-modal-section-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-3);
+    margin-bottom: -6px;
+  }
+  .article-modal-loading {
+    border-left: 2px solid rgba(0,212,255,0.15);
+    padding-left: 14px;
+    min-height: 90px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+  }
+  .article-modal-loading::before,
+  .article-modal-loading::after,
+  .article-modal-loading span {
+    content: '';
+    display: block;
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(0,212,255,0.04) 0%, rgba(0,212,255,0.12) 40%, rgba(0,212,255,0.04) 80%);
+    background-size: 300% 100%;
+    animation: modalShimmer 1.6s ease-in-out infinite;
+  }
+  .article-modal-loading::after { width: 65%; }
+  @keyframes modalShimmer {
+    0%   { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+  @media (max-width: 600px) {
+    .article-modal {
+      max-height: 95vh;
+      border-radius: 12px 12px 0 0;
+      align-self: flex-end;
+      margin: 0;
+      width: 100%;
+      max-width: 100%;
+    }
+    .article-modal-overlay {
+      align-items: flex-end;
+      padding: 0;
+    }
+    .article-modal-title { font-size: 1rem; }
+    }
+  </style>
 </head>
 
 <body>
   <div class="bg-grid"></div>
 
-  <!-- Top Navigation Bar -->
+  <!-- ─── Top Navigation ──────────────────────────────────── -->
   <header class="top-bar">
     <div class="top-bar-left">
       <div class="brand">
@@ -42,39 +900,124 @@
       <a href="/about.html" class="nav-item">About</a>
       <a href="/contact.html" class="nav-item">Contact</a>
     </nav>
+
+    <div class="top-bar-center" style="max-width: 400px; width: 100%;">
+      <div class="search-bar" id="searchBar">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text" id="publicSearchInput" placeholder="Search articles..." autocomplete="off">
+      </div>
+    </div>
+
     <div class="top-bar-right">
-      <a href="/login.html" class="btn-outline">
+      <a href="/login.html" class="admin-btn">
         Admin Login
       </a>
     </div>
   </header>
 
-  <!-- Main Content Area -->
-  <main class="public-layout">
-    <!-- Hero Section -->
-    <section class="hero">
-      <h1 class="hero-title">Welcome to the Cyber News Pipeline</h1>
-      <p class="hero-subtitle">Your daily source of curated cyber‑security intelligence.</p>
-    </section>
+  <!-- ─── Main Content Layout ────────────────────────────────── -->
+  <div class="main-layout public-layout-container">
+    <!-- Left Sidebar: Severity Filters -->
+    <aside class="sidebar" id="severityFilters">
+      <div class="sidebar-header">
+        <h2>Command Center</h2>
+      </div>
+      <p style="font-size: 0.65rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px;">Threat Classification</p>
+      
+      <div class="status-tabs">
+        <button class="status-tab active" data-severity="all" style="width: 100%; justify-content: flex-start;">
+          <span class="status-dot" style="background: var(--cyan);"></span>All Signals
+        </button>
+        <button class="status-tab" data-severity="critical" style="width: 100%; justify-content: flex-start;">
+          <span class="status-dot" style="background: var(--red);"></span>Critical Priority
+        </button>
+        <button class="status-tab" data-severity="high" style="width: 100%; justify-content: flex-start;">
+          <span class="status-dot" style="background: var(--yellow);"></span>High Severity
+        </button>
+        <button class="status-tab" data-severity="medium-low" style="width: 100%; justify-content: flex-start;">
+          <span class="status-dot" style="background: var(--green);"></span>Routine Warnings
+        </button>
+      </div>
+      
+      
+    </aside>
 
-    <!-- Hot News Section (highlights) -->
-    <section class="hot-news">
-      <h2 class="section-heading">Hot News</h2>
-      <div class="hot-news-grid" id="hotNewsGrid"></div>
-    </section>
+    <!-- Center Section: Feed Area -->
+    <main class="feed-area">
+      <div class="feed-header-public" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px;">
+        <h2 class="section-heading" style="margin: 0; border: none; padding: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 8px;">
+          <span style="width: 4px; height: 24px; background: var(--cyan); display: inline-block;"></span>
+          Intelligence Feed
+        </h2>
+        <span id="activeSignalsBadge" class="card-status-badge approved" style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">
+          Approved Signals: 0
+        </span>
+      </div>
 
-    <!-- Articles Grid -->
-    <div class="articles-grid" id="publicGrid">
-      <div class="loading-state" id="loadingState">
-        <div class="cyber-loader">
-          <div class="loader-ring"></div>
-          <div class="loader-ring"></div>
-          <div class="loader-ring"></div>
+      <!-- Dynamic Featured / Hot News Card Slot -->
+      <div id="featuredArticleContainer"></div>
+
+      <!-- Grid of Secondary Articles -->
+      <div class="public-grid-layout" id="publicGrid">
+        <div class="loading-state" id="loadingState">
+          <div class="cyber-loader">
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+          </div>
+          <p>Synchronizing security logs...</p>
         </div>
-        <p>Loading intelligence feed...</p>
+      </div>
+    </main>
+
+    <!-- Right Sidebar: Analytics & Context -->
+<aside class="right-sidebar">
+  <!-- Cyber Weather Widget -->
+  <div class="sidebar-panel cyber-weather-panel">
+    <div class="weather-header">
+      <div class="weather-icon" id="weatherIcon">🌧️</div>
+      <div class="weather-info">
+        <h3>Daily Cyber Weather</h3>
+        <div class="weather-score">
+          <span id="weatherScore">0.0</span>
+          <span class="score-max">/ 10</span>
+        </div>
       </div>
     </div>
-  </main>
+    <p class="weather-description" id="weatherDescription">
+      Loading threat intelligence...
+    </p>
+    
+    <div class="top-threats-section">
+      <h4>TOP THREATS TODAY:</h4>
+      <ul class="top-threats-list" id="topThreatsList">
+        <li class="loading-item">Loading...</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Weekly Threat Breakdown -->
+  <div class="sidebar-panel weekly-breakdown-panel">
+    <h3>WEEKLY THREAT BREAKDOWN</h3>
+    <div class="pie-chart-container">
+      <svg id="threatPieChart" viewBox="0 0 200 200" class="pie-chart"></svg>
+      <div class="pie-chart-legend" id="pieChartLegend"></div>
+    </div>
+  </div>
+
+  <!-- Most Affected Sectors -->
+  <div class="sidebar-panel sectors-panel">
+    <h3>MOST AFFECTED SECTORS (LAST 48H)</h3>
+    <ul class="sectors-list" id="sectorsList">
+      <li class="loading-item">Loading...</li>
+    </ul>
+  </div>
+
+</aside>
+  </div>
 
   <script src="/public.js"></script>
 </body>
